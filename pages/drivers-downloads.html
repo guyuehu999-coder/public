@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drivers &amp; Downloads | FS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../fs-components/component-specs/tokens.css">
+  <link rel="stylesheet" href="../fs-components/component-specs/components.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-width: 320px;
+      background: var(--color-white);
+      color: var(--color-gray-1);
+      font-family: var(--font-family-base);
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0; }
+    .page-section { padding: 40px 0; }
+    .page-section--white { background: var(--color-white); }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+    .search-row { display: flex; align-items: stretch; gap: 8px; }
+    .search-row .ds-form__input { flex: 1; min-width: 0; }
+    .search-row .ds-btn { flex-shrink: 0; }
+    .support-copy { padding-top: 12px; }
+    .support-copy a { color: var(--color-blue); text-decoration: none; }
+    .support-copy a:hover { text-decoration: underline; }
+    body.product-modal-open { overflow: hidden; }
+    .product-modal[hidden] { display: none; }
+    .product-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(25, 25, 26, 0.4);
+    }
+    .product-modal-panel {
+      display: flex;
+      flex-direction: column;
+      width: min(1160px, 100%);
+      max-height: calc(100vh - 40px);
+      overflow: hidden;
+      background: var(--color-white);
+      border-radius: var(--border-radius-md);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+    .product-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--color-gray-5);
+      flex-shrink: 0;
+    }
+    .product-modal-title { font-size: 20px; font-weight: 600; line-height: 28px; }
+    .product-modal-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 8px;
+      background: transparent;
+      border: 0;
+      border-radius: var(--border-radius-md);
+      cursor: pointer;
+    }
+    .product-modal-close:hover { background: var(--color-hover-overlay-light); }
+    .product-modal-close img { width: 16px; height: 16px; }
+    .product-modal-body { display: flex; min-height: 0; flex: 1; }
+    .product-modal-nav {
+      width: 232px;
+      flex: 0 0 232px;
+      padding: 16px 0;
+      overflow-y: auto;
+      background: var(--color-gray-8);
+    }
+    .product-modal-nav-title {
+      padding: 0 20px 12px;
+      color: var(--color-gray-3);
+      font-size: 12px;
+      line-height: 20px;
+    }
+    .product-modal-nav-item {
+      display: block;
+      width: 100%;
+      padding: 12px 20px;
+      color: var(--color-gray-1);
+      font: 400 14px/22px var(--font-family-base);
+      text-align: left;
+      background: transparent;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .product-modal-nav-item:hover { background: var(--color-hover-overlay-light); }
+    .product-modal-nav-item--active {
+      background: var(--color-white);
+      border-bottom-color: var(--brand-red);
+      font-weight: 600;
+    }
+    .product-modal-content { min-width: 0; flex: 1; overflow-x: auto; overflow-y: auto; padding: 0; }
+    .product-modal-cascade { display: flex; align-items: stretch; min-height: 100%; width: max-content; }
+    .product-modal-column {
+      display: flex;
+      flex-direction: column;
+      width: 260px;
+      min-height: 100%;
+      flex: 0 0 260px;
+      padding: 24px 20px;
+      border-right: 1px solid var(--color-gray-5);
+    }
+    .product-modal-column:last-child { border-right: 0; }
+    .product-modal-column-title { margin-bottom: 4px; font-size: 20px; font-weight: 600; line-height: 28px; }
+    .product-modal-column-desc { margin-bottom: 16px; color: var(--color-gray-3); font-size: 14px; line-height: 22px; }
+    .product-modal-column-list { display: flex; flex-direction: column; gap: 4px; list-style: none; }
+    .product-modal-column-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      width: 100%;
+      min-height: 40px;
+      padding: 9px 10px;
+      color: var(--color-gray-1);
+      font: 400 14px/22px var(--font-family-base);
+      text-align: left;
+      text-decoration: none;
+      background: transparent;
+      border: 0;
+      border-radius: var(--border-radius-md);
+      cursor: pointer;
+    }
+    .product-modal-column-item:hover { background: var(--color-hover-overlay-light); }
+    .product-modal-column-item--active { background: var(--color-gray-9); font-weight: 600; }
+    .product-modal-column-item--path-highlight { color: var(--color-gray-1); }
+    .product-modal-column-item img { width: 12px; height: 12px; flex-shrink: 0; }
+    .product-modal-column-item--leaf { cursor: default; justify-content: flex-start; }
+    .product-modal-column-item--leaf:hover { background: transparent; }
+    .product-modal-column-item--link { color: var(--color-gray-3); font-size: 12px; line-height: 20px; cursor: pointer; }
+    .product-modal-column-item--link:hover { color: var(--color-blue); text-decoration: underline; }
+    .product-modal-column-item--path-highlight.product-modal-column-item--link,
+    .product-modal-column-item--path-highlight.product-modal-column-item--link:hover,
+    .product-modal-column-item--example,
+    .product-modal-column-item--example:hover { color: var(--color-gray-1); }
+    .product-modal-column-item--toggle { justify-content: center; min-height: 32px; color: var(--color-blue); font-size: 12px; line-height: 20px; }
+    .product-modal-column-item--toggle:hover { color: var(--color-blue); text-decoration: underline; background: transparent; }
+    .product-modal-example-note { margin: 12px 10px 0; color: var(--color-gray-3); font-size: 12px; line-height: 20px; }
+    @media (max-width: 760px) {
+      body { overflow-x: hidden; }
+      .container { padding: 0 16px; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .ds-banner--sub .ds-breadcrumb { left: 16px; }
+      .ds-banner--sub { padding: 0 16px; }
+      .ds-nav-header__topbar { overflow-x: auto; }
+      .ds-nav-header__topbar-inner {
+        width: max-content;
+        min-width: 100%;
+        justify-content: flex-start;
+        gap: 24px;
+        padding: 0 16px;
+      }
+      .ds-nav-header__topbar-left,
+      .ds-nav-header__topbar-right { flex-shrink: 0; }
+      .ds-nav-header__main-inner { min-width: max-content; padding: 0 16px; }
+      .ds-nav-header__main { overflow-x: auto; }
+      .ds-nav-footer__inner { padding: 32px 16px; }
+      .ds-nav-footer__columns {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 28px 20px;
+      }
+      .ds-nav-footer__columns .ds-text-btn,
+      .ds-nav-footer__columns .ds-text-btn__text {
+        max-width: 100%;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+      .ds-nav-footer__sidebar { width: auto; grid-column: 1 / -1; }
+      .ds-nav-footer__badges {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .ds-nav-footer__badges-left { flex-wrap: wrap; gap: 12px; }
+      .ds-nav-footer__legal { flex-direction: column; gap: 12px; }
+      .ds-nav-footer__copyright { text-align: left; }
+      .product-modal { align-items: flex-start; padding: 8px; }
+      .product-modal-panel { width: 100%; max-height: calc(100vh - 16px); }
+      .product-modal-header { padding: 16px; }
+      .product-modal-body { display: flex; overflow: hidden; }
+      .product-modal-nav { width: 180px; flex: 0 0 180px; padding: 8px 0; overflow-y: auto; }
+      .product-modal-nav-title { padding: 0 16px 10px; }
+      .product-modal-nav-item { padding: 10px 16px; }
+      .product-modal-content { flex: 1; overflow-x: auto; overflow-y: auto; }
+      .product-modal-content--expanded {
+        position: relative;
+        z-index: 1;
+        margin-left: 12px;
+      }
+      .product-modal-content--expanded .product-modal-column:first-child { display: none; }
+      .product-modal-content--expanded .product-modal-cascade { width: max-content; }
+      .product-modal-content--expanded .product-modal-column:last-child {
+        width: calc(100vw - 196px);
+        flex-basis: calc(100vw - 196px);
+      }
+      .product-modal-content--models .product-modal-cascade { width: 100%; }
+      .product-modal-content--models .product-modal-column:nth-child(2) { display: none; }
+      .product-modal-content--models .product-modal-column:last-child {
+        width: 100%;
+        flex-basis: 100%;
+      }
+      .product-modal-column { width: calc(100vw - 196px); flex-basis: calc(100vw - 196px); padding: 20px 16px; }
+      .product-modal-column-title { font-size: 18px; line-height: 26px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="ds-nav-header" data-fragment="header">
+    <div class="ds-nav-header__topbar">
+      <div class="ds-nav-header__topbar-inner">
+        <div class="ds-nav-header__topbar-left">
+          <span class="ds-nav-header__topbar-text">FS United States</span>
+          <span class="ds-nav-header__topbar-divider"></span>
+          <span class="ds-nav-header__topbar-text">FREE SHIPPING on Orders Over US$79</span>
+        </div>
+        <div class="ds-nav-header__topbar-right">
+          <a href="#" class="ds-nav-header__topbar-link">Contact Us</a>
+          <span class="ds-nav-header__topbar-divider"></span>
+          <a href="#" class="ds-nav-header__topbar-link">
+            United States / $ USD
+            <svg class="ds-nav-header__dropdown-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M3 4.5L6 7.5L9 4.5" stroke="#707070" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <nav class="ds-nav-header__main">
+      <div class="ds-nav-header__main-inner">
+        <a href="#" class="ds-nav-header__logo" aria-label="FS.com Home">
+          <img src="../fs-components/component-specs/icons/icon-logo-fs.svg" alt="FS Logo" width="76" height="36">
+        </a>
+        <ul class="ds-nav-header__links">
+          <li class="ds-nav-header__link-item"><a href="#" class="ds-nav-header__link">All Products</a></li>
+          <li class="ds-nav-header__link-item"><a href="#" class="ds-nav-header__link">Solutions</a></li>
+          <li class="ds-nav-header__link-item"><a href="#" class="ds-nav-header__link">Services</a></li>
+          <li class="ds-nav-header__link-item"><a href="#" class="ds-nav-header__link">Resources</a></li>
+          <li class="ds-nav-header__link-item"><a href="#" class="ds-nav-header__link">Contact Us</a></li>
+        </ul>
+        <div class="ds-nav-header__actions">
+          <button class="ds-nav-header__action-btn" type="button" aria-label="Search">
+            <img src="../fs-components/component-specs/icons/icon-search.svg" alt="" width="24" height="24">
+          </button>
+          <button class="ds-nav-header__action-btn" type="button" aria-label="Account">
+            <img src="../fs-components/component-specs/icons/icon-account.svg" alt="" width="24" height="24">
+          </button>
+          <button class="ds-nav-header__action-btn" type="button" aria-label="Cart">
+            <img src="../fs-components/component-specs/icons/icon-cart.svg" alt="" width="24" height="24">
+          </button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="ds-banner ds-banner--sub" style="background-color: #19191A;">
+      <nav class="ds-breadcrumb ds-breadcrumb--dark" aria-label="Breadcrumb">
+        <div class="ds-breadcrumb__item">
+          <a href="#support-home" class="ds-breadcrumb__link">Support Home</a>
+          <span class="ds-breadcrumb__separator">/</span>
+        </div>
+        <div class="ds-breadcrumb__item">
+          <span class="ds-breadcrumb__current">Drivers &amp; Downloads</span>
+        </div>
+      </nav>
+      <p class="ds-banner__title">Software Download</p>
+      <p class="ds-banner__desc">Identify your product to get the latest available updates.</p>
+    </section>
+
+    <section class="page-section page-section--white">
+      <div class="container">
+        <div class="grid-2">
+          <article class="ds-card ds-card--vertical ds-card--bordered-full" style="min-height: 280px; align-items: center;">
+            <div class="ds-card__body" style="width: 100%; align-items: center; justify-content: center; gap: 16px;">
+              <h2 class="ds-card__title" style="font-size: 20px; line-height: 28px; text-align: center; -webkit-line-clamp: unset;">Identify your product</h2>
+              <p class="ds-card__desc" style="font-size: 14px; line-height: 22px; max-height: none; -webkit-line-clamp: unset; padding-top: 0; text-align: center;">Enter a FS Product ID Serial Number or Model.</p>
+              <form class="ds-form" style="width: 100%;" action="https://www.dell.com/support/home/en-us" method="get">
+                <div class="search-row">
+                  <input class="ds-form__input ds-form__input--gray" type="search" name="q" aria-label="Enter a FS Product ID Serial Number or Model." autocomplete="off">
+                  <button class="ds-btn ds-btn--filled-red ds-btn--m" type="submit"><span class="ds-btn__text">Search</span></button>
+                </div>
+              </form>
+            </div>
+          </article>
+
+          <article class="ds-card ds-card--vertical ds-card--bordered-full" style="min-height: 280px; display: flex; align-items: center; text-align: center;">
+            <div class="ds-card__body" style="width: 100%; align-items: center; justify-content: center; gap: 12px;">
+              <h2 class="ds-card__title" style="display: block; -webkit-line-clamp: unset; white-space: normal; font-size: 20px; line-height: 28px;">Browse all products</h2>
+              <p class="ds-card__desc" style="max-height: none; -webkit-line-clamp: unset; padding-top: 0; font-size: 14px; line-height: 22px; text-align: center;">Search all FS products to find the one you need.</p>
+              <button class="ds-btn ds-btn--outline-black ds-btn--l" id="browse-products-trigger" type="button" aria-haspopup="dialog" aria-controls="product-modal" style="margin-top: 8px;">
+                <span class="ds-btn__text">Browse Products</span>
+              </button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="product-modal" id="product-modal" hidden>
+    <div class="product-modal-panel" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+      <div class="product-modal-header">
+        <p class="product-modal-title" id="product-modal-title">Browse Products</p>
+        <button class="product-modal-close" id="product-modal-close" type="button" aria-label="Close product browser">
+          <img src="../fs-components/component-specs/icons/icon-close.svg" alt="">
+        </button>
+      </div>
+      <div class="product-modal-body">
+        <aside class="product-modal-nav" aria-label="Product categories">
+          <button class="product-modal-nav-item" type="button" data-product-category="Operating System">Operating System</button>
+          <button class="product-modal-nav-item" type="button" data-product-category="Management Platform">Management Platform（示例）</button>
+          <button class="product-modal-nav-item product-modal-nav-item--active" type="button" data-product-category="Switches" aria-current="true">Switches（示例）</button>
+          <button class="product-modal-nav-item" type="button" data-product-category="Networking">Networking</button>
+          <button class="product-modal-nav-item" type="button" data-product-category="Optical Transceivers">Optical Transceivers</button>
+          <button class="product-modal-nav-item" type="button" data-product-category="Fiber Optic Cables">Fiber Optic Cables</button>
+          <button class="product-modal-nav-item" type="button" data-product-category="Panels, Enclosures &amp; Racks">Panels, Enclosures &amp; Racks</button>
+          <button class="product-modal-nav-item" type="button" data-product-category="Optical Networking">Optical Networking</button>
+          <button class="product-modal-nav-item" type="button" data-product-category="Copper Systems">Copper Systems</button>
+          <button class="product-modal-nav-item" type="button" data-product-category="Testers &amp; Tools">Testers &amp; Tools</button>
+        </aside>
+        <section class="product-modal-content" id="product-modal-content" aria-live="polite"></section>
+      </div>
+    </div>
+  </div>
+
+  <footer class="ds-nav-footer" data-fragment="footer">
+    <div class="ds-nav-footer__inner">
+      <div class="ds-nav-footer__columns">
+        <div class="ds-nav-footer__col">
+          <h4 class="ds-nav-footer__col-title">About Us</h4>
+          <ul class="ds-nav-footer__col-links">
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Overview</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Global Warehouse</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Advanced R&amp;D Center</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Quality Control</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Compliance Center</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Test Center</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Contact Us</span></a></li>
+          </ul>
+        </div>
+        <div class="ds-nav-footer__col">
+          <h4 class="ds-nav-footer__col-title">Service</h4>
+          <ul class="ds-nav-footer__col-links">
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Payment Methods</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Shipping Guide</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Business Account</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Net Terms</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Return Policy</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Product Warranty</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Give us your Feedback</span></a></li>
+          </ul>
+        </div>
+        <div class="ds-nav-footer__col">
+          <h4 class="ds-nav-footer__col-title">Resource</h4>
+          <ul class="ds-nav-footer__col-links">
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Documentation</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Glossary</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Audio &amp; Video</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">FS Blog</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Case Studies</span></a></li>
+          </ul>
+        </div>
+        <div class="ds-nav-footer__col">
+          <h4 class="ds-nav-footer__col-title">Support</h4>
+          <ul class="ds-nav-footer__col-links">
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">FAQ &amp; Help Center</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Solution Support</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Query Tool</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">WDM Transceiver Stock List</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Products Verification</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Track My Order</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">RMA Checklist</span></a></li>
+          </ul>
+        </div>
+        <div class="ds-nav-footer__sidebar">
+          <div class="ds-nav-footer__subscribe">
+            <h4 class="ds-nav-footer__col-title">Stay in Touch</h4>
+            <div class="ds-nav-footer__subscribe-form">
+              <input type="email" class="ds-nav-footer__subscribe-input" placeholder="Email" aria-label="Email">
+              <button class="ds-nav-footer__subscribe-btn" type="button">Subscribe</button>
+            </div>
+          </div>
+          <div class="ds-nav-footer__app">
+            <h4 class="ds-nav-footer__col-title">Download FS APP</h4>
+            <div class="ds-nav-footer__app-badges">
+              <a href="#" aria-label="Download on the App Store"><img src="../fs-components/component-specs/icons/img-app-store.svg" alt="App Store" height="28"></a>
+              <a href="#" aria-label="Get it on Google Play"><img src="../fs-components/component-specs/icons/img-google-play.svg" alt="Google Play" height="28"></a>
+            </div>
+          </div>
+          <div class="ds-nav-footer__social">
+            <a href="#" class="ds-nav-footer__social-link" aria-label="LinkedIn"><img src="../fs-components/component-specs/icons/icon-social-linkedin.svg" alt="" width="16" height="16"></a>
+            <a href="#" class="ds-nav-footer__social-link" aria-label="YouTube"><img src="../fs-components/component-specs/icons/icon-social-youtube.svg" alt="" width="16" height="16"></a>
+            <a href="#" class="ds-nav-footer__social-link" aria-label="Facebook"><img src="../fs-components/component-specs/icons/icon-social-facebook.svg" alt="" width="16" height="16"></a>
+            <a href="#" class="ds-nav-footer__social-link" aria-label="X"><img src="../fs-components/component-specs/icons/icon-social-x.svg" alt="" width="16" height="16"></a>
+            <a href="#" class="ds-nav-footer__social-link" aria-label="Instagram"><img src="../fs-components/component-specs/icons/icon-social-instagram.svg" alt="" width="16" height="16"></a>
+            <a href="#" class="ds-nav-footer__social-link" aria-label="Reddit"><img src="../fs-components/component-specs/icons/icon-social-reddit.svg" alt="" width="16" height="16"></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="ds-nav-footer__badges">
+        <div class="ds-nav-footer__badges-left">
+          <img src="../fs-components/component-specs/icons/img-badge-trustpilot.svg" alt="Trustpilot" height="28">
+          <img src="../fs-components/component-specs/icons/img-badge-trustedsite.svg" alt="TrustedSite" height="28">
+          <img src="../fs-components/component-specs/icons/img-badge-bbb.svg" alt="BBB" height="28">
+          <img src="../fs-components/component-specs/icons/img-badge-google.svg" alt="Google Reviews" height="28">
+        </div>
+        <div class="ds-nav-footer__badges-right">
+          <a href="#" class="ds-nav-footer__region-link">
+            United States / $ USD
+            <svg class="ds-nav-footer__dropdown-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M3 4.5L6 7.5L9 4.5" stroke="#707070" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <hr class="ds-nav-footer__divider">
+
+      <div class="ds-nav-footer__legal">
+        <div class="ds-nav-footer__legal-links">
+          <a href="#" class="ds-nav-footer__legal-link">Site Map</a>
+          <span class="ds-nav-footer__legal-divider"></span>
+          <a href="#" class="ds-nav-footer__legal-link">Accessibility</a>
+          <span class="ds-nav-footer__legal-divider"></span>
+          <a href="#" class="ds-nav-footer__legal-link">Privacy Policy and Notice at Collection</a>
+          <span class="ds-nav-footer__legal-divider"></span>
+          <a href="#" class="ds-nav-footer__legal-link">Cookies Notice</a>
+          <span class="ds-nav-footer__legal-divider"></span>
+          <a href="#" class="ds-nav-footer__legal-link">Terms and Conditions</a>
+          <span class="ds-nav-footer__legal-divider"></span>
+          <a href="#" class="ds-nav-footer__legal-link">Report a Vulnerability</a>
+          <span class="ds-nav-footer__legal-divider"></span>
+          <a href="#" class="ds-nav-footer__legal-link">Do Not Sell or Share My Personal Information</a>
+          <span class="ds-nav-footer__legal-divider"></span>
+          <a href="#" class="ds-nav-footer__legal-link">Company Policies</a>
+          <span class="ds-nav-footer__legal-divider"></span>
+          <a href="#" class="ds-nav-footer__legal-link">Cookie Settings</a>
+        </div>
+        <div class="ds-nav-footer__copyright">
+          Copyright &copy; 2009-2026 FS.COM INC. All Rights Reserved.
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script>
+    (function () {
+      var productCatalog = {
+        "Operating System": [
+          { title: "PicOS", items: [] },
+          { title: "FSOS", items: [] },
+          { title: "PicOS-V", items: [] }
+        ],
+        "Management Platform": [
+          { title: "AmpCon-DC", items: [] },
+          { title: "AmpCon-Campus", items: [], url: "https://www.fs.com/uk/products_support.html?isPica=true&categories_id=83&third_categories_id=c_2439&products_model=c_2749&style_id=r_d11375" },
+          { title: "AmpCon-T", items: [] }
+        ],
+        "Switches": [
+          { title: "PicOS® Enterprise Switches", items: [{ title: "1/2.5G PicOS® Switches", models: ["S3240-24F", "S3240-24T", "S3270-10TM", "S3270-10TM-P", "S3270-24TM", "S3270-24TM-P", "S3270-48TM", "S3410-24TS", "S3410-24TS-P", "S3410-48TS", "S3410-48TS-P", "S3410C-16TF", "S3410C-16TF-P", "S3410C-16TMS-P", "S3410C-8TMS-P", "S3410L-24TF", "S3410L-24TF-P", "S3410L-48TF", "S3540L-24P", "S3540L-24T", "S3540L-48T", "S5440-24T", "S5810-28FS", "S5810-28TS", "S5810-48FS", "S5810-48TS", "S5810-48TS-P", "S5860-24MG-U", "S5860-24XB-U", "S5860-24XMG", "S5860-48XMG", "S5860-48XMG-U", "S5870-48MX6BC-U", "S5870-48T6BC", "S5870-48T6BC-U"] }, "10/25G PicOS® Switches", "40/100G PicOS® Switches", "200/400G PicOS® Switches", "AmpCon Management Software", "PicOS® License & Service", "Switch Accessories"], url: "https://www.fs.com/c/enterprise-lan-switches-4223" },
+          { title: "PicOS® Data Center Switches", items: ["10/25G PicOS® Switches", "400/800G PicOS® Switches", "PicOS® Network Packet Broker", "HCP/AI PicOS® Switches", "AmpCon Management Software", "PicOS® License & Service", "Switch Accessories"], url: "https://www.fs.com/specials/accelerated-ethernet-switching-for-ai-and-cloud-184.html" },
+          { title: "PicOS® PoE+ Switches", items: ["1G PicOS® PoE+ Switches", "2.5G/5G PicOS® PoE+ Switches", "10G PicOS® PoE+ Switches", "AmpCon Management Software", "PicOS® License & Service", "Switch Accessories"], url: "https://www.fs.com/specials/picos-poe-switches-190.html" },
+          { title: "Industrial Ethernet Switches", items: ["DIN Rail Mount Industrial Switches", "Rack Mount Industrial Switches", "Wall Mount Industrial Switches", "TSN Industrial Switches", "Industrial PoE+ Switches", "Industrial Cellular Gateway", "Switch Accessories"], url: "https://www.fs.com/c/industrial-ethernet-switches-4145" },
+          { title: "Enterprise Switches", items: ["1/2.5G Enterprise Switches", "10G Enterprise Switches", "25G Enterprise Switches", "40G Enterprise Switches", "100G Enterprise Switches", "Routers & Firewalls", "Switch Accessories"], url: "https://www.fs.com/c/enterprise-lan-switches-4223" },
+          { title: "Data Center Switches", items: ["10/25G Data Center Switches", "100G Data Center Switches", "Modular Data Center Switches", "Network Packet Brokers", "NVIDIA® Switches", "NVIDIA® UFM® & Service", "Switch Accessories"], url: "https://www.fs.com/c/lan-distribution-switches-4246" },
+          { title: "PoE+ Switches", items: ["1G PoE+ Switches", "2.5G/5G PoE+ Switches", "10G PoE+ Switches", "Switch Accessories"], url: "https://www.fs.com/c/poe-switches-4211" },
+          { title: "SME Switches", items: ["Compact SME Switches", "Standard SME Switches", "Professional SME Switches", "Professional Max SME Switches", "Aggregation SME Switches", "Switch Accessories"], url: "https://www.fs.com/c/soho-switches-4230" }
+        ],
+        "Networking": [
+          { title: "Enterprise Networking", items: ["Campus LAN Switches", "Enterprise Routers", "Wireless Access Points", "Network Security", "Network Management"], url: "https://www.fs.com/c/networking-1069" },
+          { title: "Data Center Networking", items: ["Data Center Switches", "Data Center Routers", "Network Packet Brokers", "Data Center Management", "AI Networking"], url: "https://www.fs.com/c/data-center-1028" },
+          { title: "Industrial Networking", items: ["Industrial Ethernet", "Industrial Wireless", "Industrial PoE", "Industrial Network Management"], url: "https://www.fs.com/c/industrial-networking-4163" },
+          { title: "Wireless Networking", items: ["Wi-Fi Access Points", "Wireless Controllers", "Antennas", "Wireless Accessories"], url: "https://www.fs.com/c/wireless-1070" }
+        ],
+        "Optical Transceivers": [
+          { title: "Ethernet Transceivers", items: ["1G Transceivers", "10G Transceivers", "25G Transceivers", "40G Transceivers", "100G Transceivers", "200G/400G Transceivers", "800G Transceivers"], url: "https://www.fs.com/c/optical-transceivers-9" },
+          { title: "SONET/SDH Transceivers", items: ["OC-3/STM-1 Transceivers", "OC-12/STM-4 Transceivers", "OC-48/STM-16 Transceivers", "OC-192/STM-64 Transceivers"], url: "https://www.fs.com/c/sonet-sdh-transceivers-1147" },
+          { title: "WDM Transceivers", items: ["CWDM Transceivers", "DWDM Transceivers", "Tunable Transceivers", "Coherent Transceivers"], url: "https://www.fs.com/c/wdm-transceivers-1189" },
+          { title: "Transceiver Accessories", items: ["Transceiver Cases", "Fiber Loopbacks", "Cleaning Supplies", "Transceiver Tools"], url: "https://www.fs.com/c/optical-transceiver-accessories-1100" }
+        ],
+        "Fiber Optic Cables": [
+          { title: "Fiber Patch Cables", items: ["LC Fiber Patch Cables", "MTP/MPO Fiber Cables", "SC Fiber Patch Cables", "ST Fiber Patch Cables", "Specialty Fiber Cables"], url: "https://www.fs.com/c/fiber-optic-patch-cables-1067" },
+          { title: "Data Center Fiber Cabling", items: ["MTP/MPO Trunk Cables", "MTP/MPO Harness Cables", "MTP/MPO Breakout Cables", "MTP/MPO Cassettes"], url: "https://www.fs.com/c/mpos-1565" },
+          { title: "Single Mode Fiber", items: ["OS2 Fiber Cables", "G.657.A1 Fiber Cables", "G.657.A2 Fiber Cables", "Armored Fiber Cables"], url: "https://www.fs.com/c/single-mode-fiber-optic-cables-1001" },
+          { title: "Multimode Fiber", items: ["OM1 Fiber Cables", "OM2 Fiber Cables", "OM3 Fiber Cables", "OM4 Fiber Cables", "OM5 Fiber Cables"], url: "https://www.fs.com/c/multimode-fiber-optic-cables-1002" }
+        ],
+        "Panels, Enclosures & Racks": [
+          { title: "Fiber Enclosures", items: ["Rack Mount Fiber Enclosures", "Wall Mount Fiber Enclosures", "Splice Enclosures", "Outdoor Fiber Enclosures"], url: "https://www.fs.com/c/fiber-enclosures-1018" },
+          { title: "Fiber Patch Panels", items: ["Loaded Fiber Patch Panels", "Unloaded Fiber Patch Panels", "High Density Patch Panels", "Modular Patch Panels"], url: "https://www.fs.com/c/fiber-optic-patch-panels-1019" },
+          { title: "Rack Systems", items: ["Network Racks", "Server Racks", "Open Frame Racks", "Wall Mount Racks"], url: "https://www.fs.com/c/network-server-racks-1033" },
+          { title: "Rack Accessories", items: ["Rack Shelves", "Cable Management", "Power Distribution Units", "Blanking Panels"], url: "https://www.fs.com/c/rack-accessories-1040" }
+        ],
+        "Optical Networking": [
+          { title: "WDM Systems", items: ["CWDM Systems", "DWDM Systems", "WDM Mux Demux", "WDM OADM", "WDM Monitoring"], url: "https://www.fs.com/c/wdm-10" },
+          { title: "Optical Transport", items: ["OTN Transport", "Optical Network Platforms", "Transponders & Muxponders", "Optical Amplifiers"], url: "https://www.fs.com/c/optical-transport-network-1063" },
+          { title: "PON Systems", items: ["GPON", "EPON", "XGS-PON", "PON OLT", "PON ONT"], url: "https://www.fs.com/c/pon-1071" },
+          { title: "Optical Network Components", items: ["Fiber Optic Splitters", "Optical Switches", "Optical Monitoring", "Fiber Attenuators"], url: "https://www.fs.com/c/optical-components-1016" }
+        ],
+        "Copper Systems": [
+          { title: "Copper Patch Cables", items: ["Cat5e Ethernet Cables", "Cat6 Ethernet Cables", "Cat6a Ethernet Cables", "Cat7 Ethernet Cables", "Cat8 Ethernet Cables"], url: "https://www.fs.com/c/copper-patch-cables-1072" },
+          { title: "Copper Patch Panels", items: ["Cat5e Patch Panels", "Cat6 Patch Panels", "Cat6a Patch Panels", "High Density Patch Panels"], url: "https://www.fs.com/c/copper-patch-panels-1073" },
+          { title: "Keystone Jacks", items: ["Cat5e Keystone Jacks", "Cat6 Keystone Jacks", "Cat6a Keystone Jacks", "Toolless Keystone Jacks"], url: "https://www.fs.com/c/keystone-jacks-1074" },
+          { title: "Copper Installation", items: ["Bulk Ethernet Cables", "Cable Management", "Crimping Tools", "Copper Testers"], url: "https://www.fs.com/c/copper-cabling-1075" }
+        ],
+        "Testers & Tools": [
+          { title: "Fiber Testers", items: ["Optical Power Meters", "Visual Fault Locators", "Fiber Identifiers", "OTDRs"], url: "https://www.fs.com/c/fiber-optic-testers-1057" },
+          { title: "Cable Testers", items: ["Ethernet Cable Testers", "Copper Certifiers", "Network Testers", "PoE Testers"], url: "https://www.fs.com/c/cable-testers-1058" },
+          { title: "Fiber Cleaning", items: ["Fiber Cleaning Kits", "Connector Cleaners", "Cleaning Pens", "Cleaning Wipes"], url: "https://www.fs.com/c/fiber-cleaning-1059" },
+          { title: "Installation Tools", items: ["Fiber Strippers", "Crimping Tools", "Fusion Splicers", "Termination Tools"], url: "https://www.fs.com/c/fiber-optic-tools-1060" }
+        ]
+      };
+
+      var trigger = document.getElementById('browse-products-trigger');
+      var modal = document.getElementById('product-modal');
+      var closeButton = document.getElementById('product-modal-close');
+      var content = document.getElementById('product-modal-content');
+      var navItems = Array.prototype.slice.call(document.querySelectorAll('[data-product-category]'));
+      var lastFocusedElement = null;
+      var activeCategory = 'Switches';
+      var selectedGroupIndex = null;
+      var selectedItemIndex = null;
+      var modelListExpanded = false;
+      var MODEL_VISIBLE_COUNT = 8;
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function hasModels(item) {
+        return item && typeof item === 'object' && Array.isArray(item.models) && item.models.length > 0;
+      }
+
+      function getItemTitle(item) {
+        return typeof item === 'string' ? item : item.title;
+      }
+
+      function updateActiveCategory(category) {
+        navItems.forEach(function (item) {
+          var isActive = item.getAttribute('data-product-category') === category;
+          item.classList.toggle('product-modal-nav-item--active', isActive);
+          if (isActive) {
+            item.setAttribute('aria-current', 'true');
+          } else {
+            item.removeAttribute('aria-current');
+          }
+        });
+      }
+
+      function getDisplayTitle(title, isExample) {
+        return title + (isExample ? '（示例）' : '');
+      }
+
+      function renderGroupItems(groups) {
+        return groups.map(function (group, index) {
+          var hasChildren = Array.isArray(group.items) && group.items.length > 0;
+          var isSelected = hasChildren && selectedGroupIndex === index;
+          var isPathHighlight = activeCategory === 'Switches' && index === 0;
+          var isExampleGroup = isPathHighlight || (activeCategory === 'Management Platform' && group.title === 'AmpCon-Campus');
+          var groupTitle = getDisplayTitle(group.title, isExampleGroup);
+          var groupClass = 'product-modal-column-item product-modal-column-item--leaf';
+          if (isPathHighlight) groupClass += ' product-modal-column-item--path-highlight';
+          if (isExampleGroup) groupClass += ' product-modal-column-item--example';
+          if (group.url) groupClass += ' product-modal-column-item--link';
+          if (!hasChildren) {
+            var groupMarkup = '<span class="' + groupClass + '"><span>' + escapeHtml(groupTitle) + '</span></span>';
+            if (group.url) {
+              groupMarkup = '<a href="' + escapeHtml(group.url) + '" class="' + groupClass + '"><span>' + escapeHtml(groupTitle) + '</span></a>';
+            }
+            return '<li>' + groupMarkup + '</li>';
+          }
+          return '<li><button class="product-modal-column-item' + (isSelected ? ' product-modal-column-item--active' : '') + (isPathHighlight ? ' product-modal-column-item--path-highlight' : '') + (isExampleGroup ? ' product-modal-column-item--example' : '') + '" type="button" data-cascade-group-index="' + index + '" aria-expanded="' + (isSelected ? 'true' : 'false') + '"><span>' + escapeHtml(groupTitle) + '</span><img src="../fs-components/component-specs/icons/icon-arrow-right.svg" alt="" aria-hidden="true"></button></li>';
+        }).join('');
+      }
+
+      function renderLeafItems(items, groupIndex) {
+        return items.map(function (item, itemIndex) {
+          var itemTitle = getItemTitle(item);
+          var nested = hasModels(item);
+          var isSelected = nested && selectedItemIndex === itemIndex;
+          var isPathHighlight = activeCategory === 'Switches' && groupIndex === 0 && itemIndex === 0;
+          var isExampleItem = isPathHighlight;
+          var displayTitle = getDisplayTitle(itemTitle, isExampleItem);
+          var itemClass = 'product-modal-column-item';
+          if (isPathHighlight) itemClass += ' product-modal-column-item--path-highlight';
+          if (isExampleItem) itemClass += ' product-modal-column-item--example';
+          if (!nested) {
+            return '<li><span class="' + itemClass + ' product-modal-column-item--leaf"><span>' + escapeHtml(displayTitle) + '</span></span></li>';
+          }
+          return '<li><button class="' + itemClass + (isSelected ? ' product-modal-column-item--active' : '') + '" type="button" data-cascade-item-index="' + itemIndex + '" aria-expanded="' + (isSelected ? 'true' : 'false') + '"><span>' + escapeHtml(displayTitle) + '</span><img src="../fs-components/component-specs/icons/icon-arrow-right.svg" alt="" aria-hidden="true"></button></li>';
+        }).join('');
+      }
+
+      function renderModelItems(models) {
+        var visibleModels = modelListExpanded ? models : models.slice(0, MODEL_VISIBLE_COUNT);
+        var modelItems = visibleModels.map(function (model) {
+          var isExampleModel = model === 'S3270-10TM';
+          var modelClass = 'product-modal-column-item product-modal-column-item--leaf';
+          if (isExampleModel) modelClass += ' product-modal-column-item--path-highlight product-modal-column-item--example product-modal-column-item--link';
+          var modelTitle = getDisplayTitle(model, isExampleModel);
+          var modelMarkup = '<span class="' + modelClass + '"><span>' + escapeHtml(modelTitle) + '</span></span>';
+          if (isExampleModel) {
+            modelMarkup = '<a href="https://www.fs.com/uk/products_support.html?isPica=false&categories_id=4223&third_categories_id=1368&products_model=S3270-10TM&style_id=9" class="' + modelClass + '"><span>' + escapeHtml(modelTitle) + '</span></a>';
+          }
+          return '<li>' + modelMarkup + '</li>';
+        }).join('');
+        if (models.length > MODEL_VISIBLE_COUNT) {
+          modelItems += '<li><button class="product-modal-column-item product-modal-column-item--toggle" type="button" data-model-toggle aria-expanded="' + (modelListExpanded ? 'true' : 'false') + '">' + (modelListExpanded ? 'See less' : 'See more') + '</button></li>';
+        }
+        return modelItems;
+      }
+
+      function renderCascade() {
+        var groups = productCatalog[activeCategory] || [];
+        var selectedGroup = selectedGroupIndex === null ? null : groups[selectedGroupIndex];
+        var selectedItem = null;
+        if (selectedGroup && selectedItemIndex !== null && hasModels(selectedGroup.items[selectedItemIndex])) {
+          selectedItem = selectedGroup.items[selectedItemIndex];
+        }
+        var columns = '<section class="product-modal-column" aria-label="' + escapeHtml(activeCategory) + '"><ul class="product-modal-column-list">' + renderGroupItems(groups) + '</ul></section>';
+        if (selectedGroup && Array.isArray(selectedGroup.items) && selectedGroup.items.length > 0) {
+          columns += '<section class="product-modal-column" aria-label="' + escapeHtml(selectedGroup.title) + '"><ul class="product-modal-column-list">' + renderLeafItems(selectedGroup.items, selectedGroupIndex) + '</ul></section>';
+        }
+        if (selectedItem) {
+          columns += '<section class="product-modal-column" aria-label="' + escapeHtml(getItemTitle(selectedItem)) + '"><ul class="product-modal-column-list">' + renderModelItems(selectedItem.models) + '</ul><p class="product-modal-example-note">交互示例数据</p></section>';
+        }
+        content.classList.toggle('product-modal-content--expanded', Boolean(selectedGroup));
+        content.classList.toggle('product-modal-content--models', Boolean(selectedItem));
+        content.innerHTML = '<div class="product-modal-cascade">' + columns + '</div>';
+        content.scrollLeft = 0;
+      }
+
+      function renderCategory(category) {
+        activeCategory = category;
+        selectedGroupIndex = null;
+        selectedItemIndex = null;
+        modelListExpanded = false;
+        updateActiveCategory(category);
+        renderCascade();
+      }
+
+      function openModal() {
+        lastFocusedElement = document.activeElement;
+        modal.hidden = false;
+        document.body.classList.add('product-modal-open');
+        renderCategory(activeCategory);
+        closeButton.focus();
+      }
+
+      function closeModal() {
+        modal.hidden = true;
+        document.body.classList.remove('product-modal-open');
+        if (lastFocusedElement) lastFocusedElement.focus();
+      }
+
+      trigger.addEventListener('click', openModal);
+      closeButton.addEventListener('click', closeModal);
+      modal.addEventListener('click', function (event) {
+        if (event.target === modal) closeModal();
+      });
+      navItems.forEach(function (item) {
+        item.addEventListener('click', function () {
+          renderCategory(item.getAttribute('data-product-category'));
+        });
+      });
+      content.addEventListener('click', function (event) {
+        var modelToggle = event.target.closest('[data-model-toggle]');
+        if (modelToggle) {
+          modelListExpanded = !modelListExpanded;
+          renderCascade();
+          return;
+        }
+        var itemButton = event.target.closest('[data-cascade-item-index]');
+        if (itemButton) {
+          selectedItemIndex = Number(itemButton.getAttribute('data-cascade-item-index'));
+          modelListExpanded = false;
+          renderCascade();
+          return;
+        }
+        var groupButton = event.target.closest('[data-cascade-group-index]');
+        if (!groupButton) return;
+        selectedGroupIndex = Number(groupButton.getAttribute('data-cascade-group-index'));
+        selectedItemIndex = null;
+        modelListExpanded = false;
+        renderCascade();
+      });
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && !modal.hidden) closeModal();
+      });
+
+      renderCategory(activeCategory);
+    }());
+  </script>
+</body>
+</html>
