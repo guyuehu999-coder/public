@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FS Software &amp; Firmware Download Center | FS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../fs-components/component-specs/tokens.css">
+  <link rel="stylesheet" href="../fs-components/component-specs/components.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #FFFFFF; color: var(--color-gray-1); font-family: var(--font-family-base); }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .page-section { padding: 40px 0; }
+    .page-section--white { background: #FFFFFF; }
+    .page-section--gray { background: #FAFBFB; }
+    .download-workbench { display: flex; flex-direction: column; gap: 24px; }
+    .filter-toolbar { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+    [data-filter-dropdown] { width: 210px; }
+    [data-filter-dropdown] .ds-dropdown__panel { min-width: 100%; right: auto; width: 250px; }
+    [data-filter-dropdown][data-label="More Filters"] { width: 150px; }
+    [data-filter-dropdown][data-label="More Filters"] .ds-dropdown__panel { left: auto; right: 0; width: 560px; }
+    .more-filter-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; padding: 8px 0; }
+    .more-filter-group { min-width: 0; }
+    .more-filter-group:nth-child(odd) { border-right: 1px solid #DEE0E3; }
+    .more-filter-group:nth-child(n+3) { border-top: 1px solid #DEE0E3; }
+    .more-filter-title { color: var(--color-gray-1); font-size: 12px; font-weight: 600; line-height: 20px; padding: 8px 12px 0; }
+    .filter-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+    .stack { display: flex; flex-direction: column; gap: 12px; }
+    .row { display: flex; align-items: center; }
+    .row-spread { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .row-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .metadata-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 20px; padding-top: 12px; }
+    .metadata-grid .ds-card__info-text { margin: 0; }
+    .result-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 16px; }
+    .result-actions > div { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+    .filter-option { display: flex; align-items: center; gap: 8px; padding: 4px 0; color: var(--color-gray-3); cursor: pointer; font-size: 12px; line-height: 20px; }
+    .filter-option input { width: 14px; height: 14px; accent-color: #707070; flex-shrink: 0; }
+    .filter-options { display: flex; flex-direction: column; padding: 8px 12px 12px; }
+    .product-filter-children { display: flex; flex-direction: column; padding-left: 22px; border-left: 1px solid var(--color-gray-5); margin-left: 7px; }
+    .filter-more { margin: 4px 0 0 12px; }
+    .filter-search { width: 100%; margin: 8px 12px 0; width: calc(100% - 24px); }
+    .results-list { display: flex; flex-direction: column; }
+    .results-list > hr { border: 0; border-top: 1px solid var(--color-gray-5); }
+    .resource-row { border-radius: 0; padding: 24px 0; }
+    .resource-row:hover { box-shadow: none; }
+    .resource-date { flex-shrink: 0; color: var(--color-gray-3); font-size: 12px; line-height: 20px; white-space: nowrap; }
+    .resource-title { color: var(--color-gray-1); font-size: 16px; font-weight: 600; line-height: 24px; margin: 0; }
+    .resource-desc { color: var(--color-gray-3); font-size: 12px; line-height: 20px; margin: 4px 0 0; }
+    .download-options { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--color-gray-5); overflow-x: auto; }
+    .download-options[hidden] { display: none; }
+    .download-options-title { color: var(--color-gray-1); font-size: 14px; font-weight: 600; line-height: 22px; margin-bottom: 12px; }
+    .download-table { width: 100%; min-width: 620px; border-collapse: collapse; }
+    .download-table th, .download-table td { padding: 10px 12px; border-bottom: 1px solid var(--color-gray-5); font-size: 12px; line-height: 20px; text-align: left; }
+    .download-table th { background: var(--color-gray-9); color: var(--color-gray-1); font-weight: 600; }
+    .download-table td { color: var(--color-gray-3); }
+    .download-table th:last-child, .download-table td:last-child { width: 132px; text-align: right; }
+    .download-table tbody tr:last-child td { border-bottom: 0; }
+    .download-table td:nth-child(2) { white-space: nowrap; }
+    .empty-state { display: none; padding: 40px 0; text-align: center; }
+    .empty-state p:first-child { color: var(--color-gray-1); font-size: 20px; font-weight: 600; line-height: 28px; margin-bottom: 8px; }
+    .empty-state p:nth-child(2) { color: var(--color-gray-3); font-size: 14px; line-height: 22px; margin-bottom: 16px; }
+    .pagination { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 24px; }
+    .pagination > div { display: flex; align-items: center; gap: 8px; }
+    .pagination span { color: var(--color-gray-3); font-size: 12px; line-height: 20px; }
+    .pagination button { background: none; border: none; color: var(--color-blue); cursor: pointer; font-family: var(--font-family-base); font-size: 12px; line-height: 20px; padding: 4px; }
+    .pagination button:disabled { color: rgba(25,25,26,0.3); cursor: not-allowed; }
+    .search-clear { display: none; width: 16px; height: 16px; cursor: pointer; opacity: 0.55; }
+    @media (max-width: 1240px) {
+      .container, .ds-nav-header__topbar-inner, .ds-nav-header__main-inner, .ds-nav-footer__inner { width: calc(100% - 40px); }
+    }
+    @media (max-width: 960px) {
+      .ds-nav-header__links { gap: 20px; }
+      [data-filter-dropdown] { width: calc(50% - 6px); }
+      [data-filter-dropdown][data-label="More Filters"] { width: calc(50% - 6px); }
+      [data-filter-dropdown][data-label="More Filters"] .ds-dropdown__panel { left: 0; right: auto; }
+      #clear-filters { margin-left: 0 !important; }
+      .metadata-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 640px) {
+      [data-filter-dropdown] { width: 100%; }
+      [data-filter-dropdown] .ds-dropdown__panel { left: 0; right: auto; width: 100%; }
+      .more-filter-grid { grid-template-columns: 1fr; }
+      .more-filter-group:nth-child(odd) { border-right: 0; }
+      .more-filter-group:nth-child(n+2) { border-top: 1px solid #DEE0E3; }
+      .metadata-grid { grid-template-columns: 1fr; }
+      .row-spread, .result-actions, .pagination { align-items: flex-start; flex-direction: column; }
+      .ds-banner__search { width: calc(100% - 40px); }
+      .ds-banner--search .ds-banner__title, .ds-banner--search .ds-banner__desc { width: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="ds-nav-header" data-fragment="header">
+    <div class="ds-nav-header__topbar">
+      <div class="ds-nav-header__topbar-inner">
+        <div class="ds-nav-header__topbar-left">
+          <span class="ds-nav-header__topbar-text">FS United States</span>
+          <span class="ds-nav-header__topbar-divider"></span>
+          <span class="ds-nav-header__topbar-text">FREE SHIPPING on Orders Over US$79</span>
+        </div>
+        <div class="ds-nav-header__topbar-right">
+          <a href="#" class="ds-nav-header__topbar-link">Contact Us</a>
+          <span class="ds-nav-header__topbar-divider"></span>
+          <a href="#" class="ds-nav-header__topbar-link">
+            United States / $ USD
+            <svg class="ds-nav-header__dropdown-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M3 4.5L6 7.5L9 4.5" stroke="#707070" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <nav class="ds-nav-header__main">
+      <div class="ds-nav-header__main-inner">
+        <a href="#" class="ds-nav-header__logo" aria-label="FS.com Home">
+          <img src="../fs-components/component-specs/icons/icon-logo-fs.svg" alt="FS Logo" width="76" height="36">
+        </a>
+        <ul class="ds-nav-header__links">
+          <li class="ds-nav-header__link-item"><a href="#" class="ds-nav-header__link">All Products</a></li>
+          <li class="ds-nav-header__link-item"><a href="#" class="ds-nav-header__link">Solutions</a></li>
+          <li class="ds-nav-header__link-item"><a href="#" class="ds-nav-header__link">Services</a></li>
+          <li class="ds-nav-header__link-item"><a href="#" class="ds-nav-header__link">Resources</a></li>
+          <li class="ds-nav-header__link-item"><a href="#" class="ds-nav-header__link">Contact Us</a></li>
+        </ul>
+        <div class="ds-nav-header__actions">
+          <button class="ds-nav-header__action-btn" type="button" aria-label="Search">
+            <img src="../fs-components/component-specs/icons/icon-search.svg" alt="" width="24" height="24">
+          </button>
+          <button class="ds-nav-header__action-btn" type="button" aria-label="Account">
+            <img src="../fs-components/component-specs/icons/icon-account.svg" alt="" width="24" height="24">
+          </button>
+          <button class="ds-nav-header__action-btn" type="button" aria-label="Cart">
+            <img src="../fs-components/component-specs/icons/icon-cart.svg" alt="" width="24" height="24">
+          </button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div style="background: #FFFFFF; padding: 16px 0;">
+    <div class="container">
+      <nav class="ds-breadcrumb" aria-label="Breadcrumb">
+        <div class="ds-breadcrumb__item"><a href="#" class="ds-breadcrumb__link">Home</a><span class="ds-breadcrumb__separator">/</span></div>
+        <div class="ds-breadcrumb__item"><a href="#" class="ds-breadcrumb__link">Resources</a><span class="ds-breadcrumb__separator">/</span></div>
+        <div class="ds-breadcrumb__item"><span class="ds-breadcrumb__current">Download Center</span></div>
+      </nav>
+    </div>
+  </div>
+
+  <section class="ds-banner ds-banner--search" style="background-color: #4B4B4D;">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; width: 960px;">
+      <p class="ds-banner__title" style="width: auto;">FS Software &amp; Firmware Download Center</p>
+      <p class="ds-banner__desc" style="width: auto;">Find software, firmware, drivers, patches, and tools for FS products.</p>
+    </div>
+    <form class="ds-banner__search" id="search-form" role="search">
+      <input id="resource-search" type="search" class="ds-banner__search-input" placeholder="Search by software name, version, product series, model, or file name" aria-label="Search downloads">
+      <img id="search-clear" class="search-clear" src="../fs-components/component-specs/icons/icon-close.svg" alt="Clear search">
+      <button class="ds-banner__search-btn" type="submit" aria-label="Search downloads">
+        <img src="../fs-components/component-specs/icons/icon-search.svg" alt="" style="filter: brightness(0) saturate(100%) opacity(0.6);">
+      </button>
+    </form>
+  </section>
+
+  <section class="page-section page-section--gray">
+    <div class="container">
+      <div class="download-workbench">
+        <aside style="background: #FFFFFF; border: 1px solid #DEE0E3; border-radius: 4px; padding: 20px;" aria-label="Download filters">
+          <div class="filter-toolbar">
+            <div class="ds-dropdown" data-filter-dropdown data-label="Product Category">
+              <button class="ds-dropdown__trigger" type="button" data-filter-trigger><span class="ds-dropdown__trigger-text">Product Category</span><img class="ds-dropdown__trigger-arrow" src="../fs-components/component-specs/icons/icon-chevron-down.svg" alt=""></button>
+              <div class="ds-dropdown__panel">
+                <div class="filter-options">
+                  <label class="filter-option"><input type="checkbox" data-group="product" value="switch" data-match-values="enterprise data-center poe industrial n-series-switches n8560-64c-switch">Switch</label>
+                  <div class="product-filter-children" aria-label="Switch product types">
+                    <label class="filter-option"><input type="checkbox" data-group="product" value="enterprise" data-product-child>Enterprise Switches</label>
+                    <label class="filter-option"><input type="checkbox" data-group="product" value="data-center" data-product-child>Data Center Switches</label>
+                    <label class="filter-option"><input type="checkbox" data-group="product" value="poe" data-product-child>PoE+ Switches</label>
+                    <label class="filter-option"><input type="checkbox" data-group="product" value="industrial" data-product-child>Industrial Ethernet Switches</label>
+                  </div>
+                </div>
+                <div class="filter-more"><button class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" type="button"><span class="ds-text-btn__text">Show more</span></button></div>
+              </div>
+            </div>
+
+            <div class="ds-dropdown" data-filter-dropdown data-label="Product Series">
+              <button class="ds-dropdown__trigger" type="button" data-filter-trigger><span class="ds-dropdown__trigger-text">Product Series</span><img class="ds-dropdown__trigger-arrow" src="../fs-components/component-specs/icons/icon-chevron-down.svg" alt=""></button>
+              <div class="ds-dropdown__panel">
+                <div class="filter-options">
+                  <label class="filter-option"><input type="checkbox" data-group="series" value="s5860">S5860 Enterprise Switch Series</label>
+                  <label class="filter-option"><input type="checkbox" data-group="series" value="s5800">S5800 Enterprise Switch Series</label>
+                  <label class="filter-option"><input type="checkbox" data-group="series" value="s3100">S3100 Enterprise Switch Series</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="ds-dropdown" data-filter-dropdown data-label="Software Product">
+              <button class="ds-dropdown__trigger" type="button" data-filter-trigger><span class="ds-dropdown__trigger-text">Software Product</span><img class="ds-dropdown__trigger-arrow" src="../fs-components/component-specs/icons/icon-chevron-down.svg" alt=""></button>
+              <div class="ds-dropdown__panel">
+                <div class="filter-options">
+                  <label class="filter-option"><input type="checkbox" data-group="family" value="picos">PicOS&reg;</label>
+                  <label class="filter-option"><input type="checkbox" data-group="family" value="ampcon-campus">AmpCon-Campus</label>
+                  <label class="filter-option"><input type="checkbox" data-group="family" value="ampcon-dc">AmpCon-DC</label>
+                  <label class="filter-option"><input type="checkbox" data-group="family" value="ampcon-t">AmpCon-T</label>
+                  <label class="filter-option"><input type="checkbox" data-group="family" value="picos-v">PicOS-V</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="ds-dropdown" data-filter-dropdown data-label="Software Type">
+              <button class="ds-dropdown__trigger" type="button" data-filter-trigger><span class="ds-dropdown__trigger-text">Software Type</span><img class="ds-dropdown__trigger-arrow" src="../fs-components/component-specs/icons/icon-chevron-down.svg" alt=""></button>
+              <div class="ds-dropdown__panel">
+                <div class="filter-options">
+                  <label class="filter-option"><input type="checkbox" data-group="type" value="software">Network Operating System</label>
+                  <label class="filter-option"><input type="checkbox" data-group="type" value="firmware">Firmware</label>
+                  <label class="filter-option"><input type="checkbox" data-group="type" value="drivers">Driver</label>
+                  <label class="filter-option"><input type="checkbox" data-group="type" value="patches">Security Patch</label>
+                  <label class="filter-option"><input type="checkbox" data-group="type" value="tools">Utility</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="ds-dropdown" data-filter-dropdown data-label="More Filters">
+              <button class="ds-dropdown__trigger" type="button" data-filter-trigger><span class="ds-dropdown__trigger-text">More Filters</span><img class="ds-dropdown__trigger-arrow" src="../fs-components/component-specs/icons/icon-chevron-down.svg" alt=""></button>
+              <div class="ds-dropdown__panel">
+                <div class="more-filter-grid">
+                  <div class="more-filter-group">
+                    <p class="more-filter-title">Release Type</p>
+                    <div class="filter-options">
+                      <label class="filter-option"><input type="checkbox" data-group="release" value="stable">Stable</label>
+                      <label class="filter-option"><input type="checkbox" data-group="release" value="recommended">Recommended</label>
+                      <label class="filter-option"><input type="checkbox" data-group="release" value="lts">LTS</label>
+                      <label class="filter-option"><input type="checkbox" data-group="release" value="beta">Beta</label>
+                      <label class="filter-option"><input type="checkbox" data-group="release" value="legacy">Legacy</label>
+                    </div>
+                  </div>
+                  <div class="more-filter-group">
+                    <p class="more-filter-title">Version</p>
+                    <div class="filter-options">
+                      <label class="filter-option"><input type="checkbox" data-group="version" value="2.10.1">2.10.1</label>
+                      <label class="filter-option"><input type="checkbox" data-group="version" value="7.0.3">7.0.3</label>
+                      <label class="filter-option"><input type="checkbox" data-group="version" value="2.0.0">2.0.0</label>
+                    </div>
+                  </div>
+                  <div class="more-filter-group">
+                    <p class="more-filter-title">Operating System</p>
+                    <div class="filter-options">
+                      <label class="filter-option"><input type="checkbox" data-group="os" value="linux">Linux</label>
+                      <label class="filter-option"><input type="checkbox" data-group="os" value="windows">Windows</label>
+                      <label class="filter-option"><input type="checkbox" data-group="os" value="macos">macOS</label>
+                      <label class="filter-option"><input type="checkbox" data-group="os" value="web">Web</label>
+                    </div>
+                  </div>
+                  <div class="more-filter-group">
+                    <p class="more-filter-title">Published Date</p>
+                    <div class="filter-options">
+                      <label class="filter-option"><input type="checkbox" data-group="date" value="7-days">Last 7 Days</label>
+                      <label class="filter-option"><input type="checkbox" data-group="date" value="30-days">Last 30 Days</label>
+                      <label class="filter-option"><input type="checkbox" data-group="date" value="90-days">Last 90 Days</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--m" type="button" id="clear-filters" style="margin-left: auto; height: 42px;"><span class="ds-text-btn__text">Clear All</span></button>
+          </div>
+          <div id="selected-filters" class="row-wrap" style="margin-top: 12px;"></div>
+        </aside>
+
+        <div>
+          <div class="row-spread" style="margin-bottom: 16px;">
+            <p id="results-summary" style="font-size: 14px; font-weight: 600; line-height: 22px;">Results 1–25 of 356</p>
+            <div class="row-wrap">
+              <span style="color: #707070; font-size: 12px; line-height: 20px;">Sort by:</span>
+              <div class="ds-dropdown" style="min-width: 148px;">
+                <button class="ds-dropdown__trigger" id="sort-trigger" type="button"><span class="ds-dropdown__trigger-text">Relevance</span><img class="ds-dropdown__trigger-arrow" src="../fs-components/component-specs/icons/icon-chevron-down.svg" alt=""></button>
+                <div class="ds-dropdown__panel" id="sort-panel">
+                  <div class="ds-dropdown__list">
+                    <div class="ds-dropdown__item" data-sort="relevance">Relevance</div>
+                    <div class="ds-dropdown__item" data-sort="newest">Newest</div>
+                    <div class="ds-dropdown__item" data-sort="oldest">Oldest</div>
+                    <div class="ds-dropdown__item" data-sort="product">Software Product</div>
+                    <div class="ds-dropdown__item" data-sort="version">Version</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="results-list" class="results-list">
+            <article class="ds-icon-card ds-icon-card--left ds-icon-card--bg-white" data-resource data-type="software" data-product="enterprise" data-family="picos" data-series="s5860" data-release="stable" data-version="2.10.1" data-os="linux web" data-date="30-days">
+              <img class="ds-icon-card__icon" src="../fs-components/component-specs/icons/icon-placeholder-switch.svg" alt="Software resource">
+              <div class="ds-icon-card__body">
+                <div class="row-spread">
+                  <p class="resource-title">PicOS&reg; 2.10.1</p>
+                  <p class="resource-date">Jun 20, 2026</p>
+                </div>
+                <p class="resource-desc">A stable PicOS&reg; network operating system release for supported FS S5860 Enterprise Switches.</p>
+                <div class="metadata-grid">
+                  <p class="ds-card__info-text">Product Category: Enterprise Switches</p>
+                  <p class="ds-card__info-text">Product Series: S5860 Enterprise Switch Series</p>
+                  <p class="ds-card__info-text">Software Product: PicOS&reg;</p>
+                  <p class="ds-card__info-text">Software Type: Network Operating System</p>
+                  <p class="ds-card__info-text">Version: 2.10.1</p>
+                  <p class="ds-card__info-text">Release Type: Stable</p>
+                  <p class="ds-card__info-text">File Size: 1.2 GB</p>
+                </div>
+                <div class="result-actions">
+                  <div>
+                    <a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#"><span class="ds-text-btn__text">Release Notes</span><img class="ds-text-btn__icon" src="../fs-components/component-specs/icons/icon-arrow-right.svg" alt=""></a>
+                    <a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#"><span class="ds-text-btn__text">Upgrade Guide</span><img class="ds-text-btn__icon" src="../fs-components/component-specs/icons/icon-arrow-right.svg" alt=""></a>
+                  </div>
+                  <a href="#" class="ds-btn ds-btn--filled-black ds-btn--m"><span class="ds-btn__text">Download</span></a>
+                </div>
+              </div>
+            </article>
+            <hr>
+
+            <article class="ds-icon-card ds-icon-card--left ds-icon-card--bg-white" data-resource data-type="software" data-product="enterprise" data-family="ampcon-campus" data-series="s5800" data-release="stable" data-version="2.0.0" data-os="linux web" data-date="30-days">
+              <img class="ds-icon-card__icon" src="../fs-components/component-specs/icons/icon-placeholder-switch.svg" alt="Software resource">
+              <div class="ds-icon-card__body">
+                <div class="row-spread"><p class="resource-title">AmpCon-Campus 2.0.0</p><p class="resource-date">Jun 19, 2026</p></div>
+                <p class="resource-desc">A centralized network management platform for deploying, monitoring, and maintaining supported FS switches.</p>
+                <div class="metadata-grid">
+                  <p class="ds-card__info-text">Product Category: Network Management</p>
+                  <p class="ds-card__info-text">Deployment Type: Virtual Appliance</p>
+                  <p class="ds-card__info-text">Software Product: AmpCon-Campus</p>
+                  <p class="ds-card__info-text">Software Type: Network Management Software</p>
+                  <p class="ds-card__info-text">Version: 2.0.0</p>
+                  <p class="ds-card__info-text">Release Type: Stable</p>
+                  <p class="ds-card__info-text">File Size: 4.8 GB</p>
+                </div>
+                <div class="result-actions">
+                  <div>
+                    <a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#"><span class="ds-text-btn__text">Release Notes</span><img class="ds-text-btn__icon" src="../fs-components/component-specs/icons/icon-arrow-right.svg" alt=""></a>
+                    <a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#"><span class="ds-text-btn__text">Installation Guide</span><img class="ds-text-btn__icon" src="../fs-components/component-specs/icons/icon-arrow-right.svg" alt=""></a>
+                  </div>
+                  <button type="button" class="ds-btn ds-btn--filled-black ds-btn--m" data-download-toggle aria-expanded="false" aria-controls="ampcon-campus-downloads"><span class="ds-btn__text">Select Software Type to Download</span></button>
+                </div>
+                <div class="download-options" id="ampcon-campus-downloads" role="region" aria-labelledby="ampcon-campus-downloads-title" hidden>
+                  <p class="download-options-title" id="ampcon-campus-downloads-title">Available Software Downloads</p>
+                  <table class="download-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Type</th>
+                        <th scope="col">Release Date</th>
+                        <th scope="col">Download</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>VMware ESXi</td>
+                        <td>Jul-2026</td>
+                        <td><button type="button" class="ds-btn ds-btn--filled-black ds-btn--m"><span class="ds-btn__text">Download</span></button></td>
+                      </tr>
+                      <tr>
+                        <td>VirtualBox for Lab Only</td>
+                        <td>Jul-2026</td>
+                        <td><button type="button" class="ds-btn ds-btn--filled-black ds-btn--m"><span class="ds-btn__text">Download</span></button></td>
+                      </tr>
+                      <tr>
+                        <td>Physical Machines (Ubuntu Docker)</td>
+                        <td>Jul-2026</td>
+                        <td><button type="button" class="ds-btn ds-btn--filled-black ds-btn--m"><span class="ds-btn__text">Download</span></button></td>
+                      </tr>
+                      <tr>
+                        <td>QEMU or KVM</td>
+                        <td>Jul-2026</td>
+                        <td><button type="button" class="ds-btn ds-btn--filled-black ds-btn--m"><span class="ds-btn__text">Download</span></button></td>
+                      </tr>
+                      <tr>
+                        <td>Upgrade Package</td>
+                        <td>Jul-2026</td>
+                        <td><button type="button" class="ds-btn ds-btn--filled-black ds-btn--m"><span class="ds-btn__text">Download</span></button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </article>
+            <hr>
+
+            <article class="ds-icon-card ds-icon-card--left ds-icon-card--bg-white" data-resource data-type="firmware" data-product="enterprise" data-family="picos" data-series="s5860" data-release="recommended" data-version="7.0.3" data-os="web" data-date="30-days">
+              <img class="ds-icon-card__icon" src="../fs-components/component-specs/icons/icon-placeholder-switch.svg" alt="Firmware resource">
+              <div class="ds-icon-card__body">
+                <div class="row-spread"><p class="resource-title">S5860 Enterprise Switch Series Firmware 7.0.3</p><p class="resource-date">Jun 18, 2026</p></div>
+                <p class="resource-desc">A recommended firmware release for supported FS S5860 Enterprise Switches.</p>
+                <div class="metadata-grid">
+                  <p class="ds-card__info-text">Product Category: Enterprise Switches</p>
+                  <p class="ds-card__info-text">Product Series: S5860 Enterprise Switch Series</p>
+                  <p class="ds-card__info-text">Software Type: Firmware</p>
+                  <p class="ds-card__info-text">Compatible Models: S5860-48XMG-U</p>
+                  <p class="ds-card__info-text">Version: 7.0.3</p>
+                  <p class="ds-card__info-text">Release Type: Recommended</p>
+                  <p class="ds-card__info-text">File Size: 356 MB</p>
+                </div>
+                <div class="result-actions">
+                  <div>
+                    <a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#"><span class="ds-text-btn__text">Release Notes</span><img class="ds-text-btn__icon" src="../fs-components/component-specs/icons/icon-arrow-right.svg" alt=""></a>
+                    <a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#"><span class="ds-text-btn__text">Upgrade Guide</span><img class="ds-text-btn__icon" src="../fs-components/component-specs/icons/icon-arrow-right.svg" alt=""></a>
+                  </div>
+                  <a href="#" class="ds-btn ds-btn--filled-black ds-btn--m"><span class="ds-btn__text">Download</span></a>
+                </div>
+              </div>
+            </article>
+            <hr>
+
+            <article class="ds-icon-card ds-icon-card--left ds-icon-card--bg-white" data-resource data-type="tools" data-product="data-center" data-family="ampcon-dc" data-series="s5800" data-release="stable" data-version="1.3.0" data-os="windows" data-date="90-days">
+              <img class="ds-icon-card__icon" src="../fs-components/component-specs/icons/icon-placeholder-switch.svg" alt="Tool resource">
+              <div class="ds-icon-card__body">
+                <div class="row-spread"><p class="resource-title">AmpCon Device Discovery Tool</p><p class="resource-date">May 27, 2026</p></div>
+                <p class="resource-desc">A Windows utility for discovering supported FS devices on the local network.</p>
+                <div class="metadata-grid">
+                  <p class="ds-card__info-text">Product Category: Network Management</p>
+                  <p class="ds-card__info-text">Software Product: AmpCon</p>
+                  <p class="ds-card__info-text">Software Type: Utility</p>
+                  <p class="ds-card__info-text">Operating System: Windows</p>
+                  <p class="ds-card__info-text">Version: 1.3.0</p>
+                  <p class="ds-card__info-text">Release Type: Stable</p>
+                  <p class="ds-card__info-text">File Size: 85 MB</p>
+                </div>
+                <div class="result-actions">
+                  <div>
+                    <a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#"><span class="ds-text-btn__text">User Guide</span><img class="ds-text-btn__icon" src="../fs-components/component-specs/icons/icon-arrow-right.svg" alt=""></a>
+                  </div>
+                  <a href="#" class="ds-btn ds-btn--filled-black ds-btn--m"><span class="ds-btn__text">Download</span></a>
+                </div>
+              </div>
+            </article>
+            <hr>
+
+            <article class="ds-icon-card ds-icon-card--left ds-icon-card--bg-white" data-resource data-type="patches" data-product="poe" data-family="picos-v" data-series="s3100" data-release="lts" data-version="2.10.1" data-os="linux" data-date="90-days">
+              <img class="ds-icon-card__icon" src="../fs-components/component-specs/icons/icon-placeholder-switch.svg" alt="Patch resource">
+              <div class="ds-icon-card__body">
+                <div class="row-spread"><p class="resource-title">PicOS-V Security Patch 2.10.1</p><p class="resource-date">Apr 30, 2026</p></div>
+                <p class="resource-desc">A security update for PicOS-V 2.10.1 on supported PoE+ switches.</p>
+                <div class="metadata-grid">
+                  <p class="ds-card__info-text">Product Category: PoE+ Switches</p>
+                  <p class="ds-card__info-text">Software Product: PicOS-V</p>
+                  <p class="ds-card__info-text">Software Type: Security Patch</p>
+                  <p class="ds-card__info-text">Operating System: Linux</p>
+                  <p class="ds-card__info-text">Version: 2.10.1</p>
+                  <p class="ds-card__info-text">Release Type: LTS</p>
+                  <p class="ds-card__info-text">File Size: 42 MB</p>
+                </div>
+                <div class="result-actions">
+                  <div>
+                    <a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#"><span class="ds-text-btn__text">Release Notes</span><img class="ds-text-btn__icon" src="../fs-components/component-specs/icons/icon-arrow-right.svg" alt=""></a>
+                    <a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#"><span class="ds-text-btn__text">Upgrade Guide</span><img class="ds-text-btn__icon" src="../fs-components/component-specs/icons/icon-arrow-right.svg" alt=""></a>
+                  </div>
+                  <a href="#" class="ds-btn ds-btn--filled-black ds-btn--m"><span class="ds-btn__text">Download</span></a>
+                </div>
+              </div>
+            </article>
+            <hr>
+
+            <article class="ds-icon-card ds-icon-card--left ds-icon-card--bg-white" data-resource data-type="software" data-product="n-series-switches" data-family="fsos" data-series="n-series" data-release="stable" data-version="12.5(1) B0505">
+              <img class="ds-icon-card__icon" src="../fs-components/component-specs/icons/icon-placeholder-switch.svg" alt="Software resource">
+              <div class="ds-icon-card__body">
+                <p class="resource-title">S3240 Enterprise Switch Series FSOS 12.5(1) B0505</p>
+                <p class="resource-desc">A stable FSOS network operating system release for supported FS S3240 Enterprise Switches.</p>
+                <div class="metadata-grid">
+                  <p class="ds-card__info-text">Product Category: Enterprise Switches</p>
+                  <p class="ds-card__info-text">Product Series: S3240 Enterprise Switch Series</p>
+                  <p class="ds-card__info-text">Software Product: FSOS</p>
+                  <p class="ds-card__info-text">Version: 12.5(1) B0505</p>
+                  <p class="ds-card__info-text">Software Type: Network Operating System</p>
+                  <p class="ds-card__info-text">Release Type: Stable</p>
+                  <p class="ds-card__info-text">Compatible Models: View Models</p>
+                </div>
+                <div class="result-actions">
+                  <div>
+                    <a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#"><span class="ds-text-btn__text">Release Notes</span><img class="ds-text-btn__icon" src="../fs-components/component-specs/icons/icon-arrow-right.svg" alt=""></a>
+                    <a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#"><span class="ds-text-btn__text">Upgrade Guide</span><img class="ds-text-btn__icon" src="../fs-components/component-specs/icons/icon-arrow-right.svg" alt=""></a>
+                  </div>
+                  <button type="button" class="ds-btn ds-btn--filled-black ds-btn--m" data-download-toggle aria-expanded="false" aria-controls="n-series-downloads"><span class="ds-btn__text">Select Model to Download</span></button>
+                </div>
+                <div class="download-options" id="n-series-downloads" role="region" aria-labelledby="n-series-downloads-title" hidden>
+                  <p class="download-options-title" id="n-series-downloads-title">Available Image Downloads</p>
+                  <table class="download-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Compatible Models</th>
+                        <th scope="col">Image File</th>
+                        <th scope="col">Download</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>S3240-8P / S3240-24P</td>
+                        <td>FSOS-12.5(1)-B0505-S3240-P.img</td>
+                        <td><button type="button" class="ds-btn ds-btn--filled-black ds-btn--m"><span class="ds-btn__text">Download</span></button></td>
+                      </tr>
+                      <tr>
+                        <td>S3240-8T</td>
+                        <td>FSOS-12.5(1)-B0505-S3240-T.img</td>
+                        <td><button type="button" class="ds-btn ds-btn--filled-black ds-btn--m"><span class="ds-btn__text">Download</span></button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </article>
+            <hr>
+
+            <article class="ds-icon-card ds-icon-card--left ds-icon-card--bg-white" data-resource data-type="software" data-product="n8560-64c-switch" data-family="fsos" data-series="n8560-series" data-release="stable" data-version="11.0.5 B9P66S2">
+              <img class="ds-icon-card__icon" src="../fs-components/component-specs/icons/icon-placeholder-switch.svg" alt="Software resource">
+              <div class="ds-icon-card__body">
+                <p class="resource-title">N8560-64C Switch FSOS 11.0.5 B9P66S2</p>
+                <p class="resource-desc">A stable FSOS network operating system release for the supported FS N8560-64C Data Center Switch.</p>
+                <div class="metadata-grid">
+                  <p class="ds-card__info-text">Product Category: Data Center Switches</p>
+                  <p class="ds-card__info-text">Product Series: N8560 Data Center Switch Series</p>
+                  <p class="ds-card__info-text">Software Product: FSOS</p>
+                  <p class="ds-card__info-text">Version: 11.0.5 B9P66S2</p>
+                  <p class="ds-card__info-text">Software Type: Network Operating System</p>
+                  <p class="ds-card__info-text">Release Type: Stable</p>
+                  <p class="ds-card__info-text">Compatible Models: N8560-64C</p>
+                </div>
+                <div class="result-actions">
+                  <div>
+                    <a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#"><span class="ds-text-btn__text">Release Notes</span><img class="ds-text-btn__icon" src="../fs-components/component-specs/icons/icon-arrow-right.svg" alt=""></a>
+                    <a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#"><span class="ds-text-btn__text">Upgrade Guide</span><img class="ds-text-btn__icon" src="../fs-components/component-specs/icons/icon-arrow-right.svg" alt=""></a>
+                  </div>
+                  <a href="#" class="ds-btn ds-btn--filled-black ds-btn--m"><span class="ds-btn__text">Download</span></a>
+                </div>
+              </div>
+            </article>
+
+
+          </div>
+
+          <div id="empty-state" class="empty-state">
+            <p>No downloads found</p>
+            <p>Try another software name, version, product series, model, or file name.</p>
+            <div class="row-wrap" style="justify-content: center;">
+              <button id="clear-search" class="ds-btn ds-btn--outline-gray ds-btn--l" type="button"><span class="ds-btn__text">Clear Search</span></button>
+              <button id="clear-empty-filters" class="ds-btn ds-btn--outline-black ds-btn--l" type="button"><span class="ds-btn__text">Clear Filters</span></button>
+            </div>
+          </div>
+
+          <div class="pagination">
+            <div><span>Results per page:</span><button type="button">25</button><button type="button">50</button><button type="button">100</button></div>
+            <div><button type="button" disabled>Previous</button><span>1 of 15</span><button type="button">Next</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="ds-nav-footer" data-fragment="footer">
+    <div class="ds-nav-footer__inner">
+      <div class="ds-nav-footer__columns">
+        <div class="ds-nav-footer__col">
+          <h4 class="ds-nav-footer__col-title">About Us</h4>
+          <ul class="ds-nav-footer__col-links">
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Overview</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Global Warehouse</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Advanced R&amp;D Center</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Quality Control</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Compliance Center</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Test Center</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Contact Us</span></a></li>
+          </ul>
+        </div>
+        <div class="ds-nav-footer__col">
+          <h4 class="ds-nav-footer__col-title">Service</h4>
+          <ul class="ds-nav-footer__col-links">
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Payment Methods</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Shipping Guide</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Business Account</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Net Terms</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Return Policy</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Product Warranty</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Give us your Feedback</span></a></li>
+          </ul>
+        </div>
+        <div class="ds-nav-footer__col">
+          <h4 class="ds-nav-footer__col-title">Resource</h4>
+          <ul class="ds-nav-footer__col-links">
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Documentation</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Glossary</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Audio &amp; Video</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">FS Blog</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Case Studies</span></a></li>
+          </ul>
+        </div>
+        <div class="ds-nav-footer__col">
+          <h4 class="ds-nav-footer__col-title">Support</h4>
+          <ul class="ds-nav-footer__col-links">
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">FAQ &amp; Help Center</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Solution Support</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Query Tool</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">WDM Transceiver Stock List</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Products Verification</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Track My Order</span></a></li>
+            <li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">RMA Checklist</span></a></li>
+          </ul>
+        </div>
+        <div class="ds-nav-footer__sidebar">
+          <div class="ds-nav-footer__subscribe">
+            <h4 class="ds-nav-footer__col-title">Stay in Touch</h4>
+            <div class="ds-nav-footer__subscribe-form"><input type="email" class="ds-nav-footer__subscribe-input" placeholder="Email" aria-label="Email"><button class="ds-nav-footer__subscribe-btn" type="button">Subscribe</button></div>
+          </div>
+          <div class="ds-nav-footer__app">
+            <h4 class="ds-nav-footer__col-title">Download FS APP</h4>
+            <div class="ds-nav-footer__app-badges"><a href="#" aria-label="Download on the App Store"><img src="../fs-components/component-specs/icons/img-app-store.svg" alt="App Store" height="28"></a><a href="#" aria-label="Get it on Google Play"><img src="../fs-components/component-specs/icons/img-google-play.svg" alt="Google Play" height="28"></a></div>
+          </div>
+          <div class="ds-nav-footer__social">
+            <a href="#" class="ds-nav-footer__social-link" aria-label="LinkedIn"><img src="../fs-components/component-specs/icons/icon-social-linkedin.svg" alt="" width="16" height="16"></a>
+            <a href="#" class="ds-nav-footer__social-link" aria-label="YouTube"><img src="../fs-components/component-specs/icons/icon-social-youtube.svg" alt="" width="16" height="16"></a>
+            <a href="#" class="ds-nav-footer__social-link" aria-label="Facebook"><img src="../fs-components/component-specs/icons/icon-social-facebook.svg" alt="" width="16" height="16"></a>
+            <a href="#" class="ds-nav-footer__social-link" aria-label="X"><img src="../fs-components/component-specs/icons/icon-social-x.svg" alt="" width="16" height="16"></a>
+            <a href="#" class="ds-nav-footer__social-link" aria-label="Instagram"><img src="../fs-components/component-specs/icons/icon-social-instagram.svg" alt="" width="16" height="16"></a>
+            <a href="#" class="ds-nav-footer__social-link" aria-label="Reddit"><img src="../fs-components/component-specs/icons/icon-social-reddit.svg" alt="" width="16" height="16"></a>
+          </div>
+        </div>
+      </div>
+      <div class="ds-nav-footer__badges">
+        <div class="ds-nav-footer__badges-left"><img src="../fs-components/component-specs/icons/img-badge-trustpilot.svg" alt="Trustpilot" height="28"><img src="../fs-components/component-specs/icons/img-badge-trustedsite.svg" alt="TrustedSite" height="28"><img src="../fs-components/component-specs/icons/img-badge-bbb.svg" alt="BBB" height="28"><img src="../fs-components/component-specs/icons/img-badge-google.svg" alt="Google Reviews" height="28"></div>
+        <div class="ds-nav-footer__badges-right"><a href="#" class="ds-nav-footer__region-link">United States / $ USD<svg class="ds-nav-footer__dropdown-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="#707070" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+      </div>
+      <hr class="ds-nav-footer__divider">
+      <div class="ds-nav-footer__legal">
+        <div class="ds-nav-footer__legal-links"><a href="#" class="ds-nav-footer__legal-link">Site Map</a><span class="ds-nav-footer__legal-divider"></span><a href="#" class="ds-nav-footer__legal-link">Accessibility</a><span class="ds-nav-footer__legal-divider"></span><a href="#" class="ds-nav-footer__legal-link">Privacy Policy and Notice at Collection</a><span class="ds-nav-footer__legal-divider"></span><a href="#" class="ds-nav-footer__legal-link">Cookies Notice</a><span class="ds-nav-footer__legal-divider"></span><a href="#" class="ds-nav-footer__legal-link">Terms and Conditions</a><span class="ds-nav-footer__legal-divider"></span><a href="#" class="ds-nav-footer__legal-link">Report a Vulnerability</a><span class="ds-nav-footer__legal-divider"></span><a href="#" class="ds-nav-footer__legal-link">Do Not Sell or Share My Personal Information</a><span class="ds-nav-footer__legal-divider"></span><a href="#" class="ds-nav-footer__legal-link">Company Policies</a><span class="ds-nav-footer__legal-divider"></span><a href="#" class="ds-nav-footer__legal-link">Cookie Settings</a></div>
+        <div class="ds-nav-footer__copyright">Copyright &copy; 2009-2026 FS.COM INC. All Rights Reserved.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var searchInput = document.getElementById('resource-search');
+      var searchForm = document.getElementById('search-form');
+      var searchClear = document.getElementById('search-clear');
+      var resultsList = document.getElementById('results-list');
+      var emptyState = document.getElementById('empty-state');
+      var summary = document.getElementById('results-summary');
+      var selectedFilters = document.getElementById('selected-filters');
+      var activeTab = 'all';
+      var filterInputs = Array.prototype.slice.call(document.querySelectorAll('[data-group]'));
+      var resources = Array.prototype.slice.call(document.querySelectorAll('[data-resource]'));
+      var filterDropdowns = Array.prototype.slice.call(document.querySelectorAll('[data-filter-dropdown]'));
+
+      function activeFilters() {
+        return filterInputs.filter(function (input) { return input.checked; });
+      }
+
+      function updateFilterLabels() {
+        filterDropdowns.forEach(function (dropdown) {
+          dropdown.querySelector('.ds-dropdown__trigger-text').textContent = dropdown.dataset.label;
+        });
+      }
+
+      function closeFilterDropdown(dropdown) {
+        dropdown.querySelector('[data-filter-trigger]').classList.remove('ds-dropdown__trigger--open');
+        dropdown.querySelector('.ds-dropdown__panel').classList.remove('ds-dropdown__panel--open');
+      }
+
+      function matchesFilters(resource) {
+        var groups = {};
+        activeFilters().forEach(function (input) {
+          if (!groups[input.dataset.group]) groups[input.dataset.group] = [];
+          groups[input.dataset.group].push((input.dataset.matchValues || input.value).split(' '));
+        });
+        return Object.keys(groups).every(function (group) {
+          var resourceValues = (resource.dataset[group] || '').split(' ');
+          return groups[group].some(function (selectedValues) {
+            return selectedValues.some(function (selected) { return resourceValues.indexOf(selected) !== -1; });
+          });
+        });
+      }
+
+      function updateChips() {
+        selectedFilters.innerHTML = '';
+        activeFilters().forEach(function (input) {
+          var tag = document.createElement('span');
+          tag.className = 'ds-card__tag';
+          tag.textContent = input.parentNode.textContent.trim().replace(/\s*\(\d+\)$/, '');
+          selectedFilters.appendChild(tag);
+        });
+      }
+
+      function updateResults() {
+        var query = searchInput.value.toLowerCase().trim();
+        var visible = 0;
+        resources.forEach(function (resource) {
+          var haystack = resource.textContent.toLowerCase();
+          var tabMatch = activeTab === 'all' || resource.dataset.type === activeTab;
+          var isVisible = tabMatch && matchesFilters(resource) && (!query || haystack.indexOf(query) !== -1);
+          resource.style.display = isVisible ? '' : 'none';
+          var divider = resource.nextElementSibling;
+          if (divider && divider.tagName === 'HR') divider.style.display = isVisible ? '' : 'none';
+          if (isVisible) visible += 1;
+        });
+        resultsList.style.display = visible ? '' : 'none';
+        emptyState.style.display = visible ? 'none' : 'block';
+        summary.textContent = visible ? 'Results 1–' + visible + ' of 356' : 'Results 0 of 356';
+        searchClear.style.display = query ? 'block' : 'none';
+        updateChips();
+        updateFilterLabels();
+      }
+
+      searchForm.addEventListener('submit', function (event) { event.preventDefault(); updateResults(); });
+      searchInput.addEventListener('input', updateResults);
+      searchClear.addEventListener('click', function () { searchInput.value = ''; updateResults(); searchInput.focus(); });
+      var productParent = document.querySelector('input[data-match-values]');
+      var productChildren = Array.prototype.slice.call(document.querySelectorAll('input[data-product-child]'));
+      filterInputs.forEach(function (input) {
+        input.addEventListener('change', function () {
+          if (input === productParent && input.checked) {
+            productChildren.forEach(function (child) { child.checked = false; });
+          } else if (input.hasAttribute('data-product-child') && input.checked && productParent) {
+            productParent.checked = false;
+          }
+          updateResults();
+        });
+      });
+
+      filterDropdowns.forEach(function (dropdown) {
+        var trigger = dropdown.querySelector('[data-filter-trigger]');
+        var panel = dropdown.querySelector('.ds-dropdown__panel');
+        trigger.addEventListener('click', function (event) {
+          event.stopPropagation();
+          var willOpen = !panel.classList.contains('ds-dropdown__panel--open');
+          filterDropdowns.forEach(closeFilterDropdown);
+          if (willOpen) {
+            trigger.classList.add('ds-dropdown__trigger--open');
+            panel.classList.add('ds-dropdown__panel--open');
+          }
+        });
+        panel.addEventListener('click', function (event) { event.stopPropagation(); });
+      });
+      document.addEventListener('click', function () { filterDropdowns.forEach(closeFilterDropdown); });
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') filterDropdowns.forEach(closeFilterDropdown);
+      });
+
+      document.querySelectorAll('[data-download-toggle]').forEach(function (trigger) {
+        var panel = document.getElementById(trigger.getAttribute('aria-controls'));
+        trigger.addEventListener('click', function () {
+          var shouldOpen = panel.hidden;
+          panel.hidden = !shouldOpen;
+          trigger.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+        });
+      });
+
+      function clearAll() {
+        searchInput.value = '';
+        filterInputs.forEach(function (input) { input.checked = false; });
+        updateResults();
+      }
+      document.getElementById('clear-filters').addEventListener('click', clearAll);
+      document.getElementById('clear-empty-filters').addEventListener('click', clearAll);
+      document.getElementById('clear-search').addEventListener('click', function () { searchInput.value = ''; updateResults(); });
+
+      document.querySelectorAll('[data-tab-group] [data-tab]').forEach(function (tab) {
+        function activateTab() {
+          activeTab = tab.dataset.tab;
+          document.querySelectorAll('[data-tab-group] [data-tab]').forEach(function (item) {
+            item.classList.remove('ds-tab__item--active');
+            var indicator = item.querySelector('.ds-tab__indicator');
+            if (indicator) indicator.remove();
+          });
+          tab.classList.add('ds-tab__item--active');
+          var indicator = document.createElement('div');
+          indicator.className = 'ds-tab__indicator';
+          tab.querySelector('.ds-tab__item-inner').appendChild(indicator);
+          updateResults();
+        }
+        tab.addEventListener('click', activateTab);
+        tab.addEventListener('keydown', function (event) { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); activateTab(); } });
+      });
+
+      var sortTrigger = document.getElementById('sort-trigger');
+      var sortPanel = document.getElementById('sort-panel');
+      sortTrigger.addEventListener('click', function () {
+        sortTrigger.classList.toggle('ds-dropdown__trigger--open');
+        sortPanel.classList.toggle('ds-dropdown__panel--open');
+      });
+      sortPanel.querySelectorAll('[data-sort]').forEach(function (item) {
+        item.addEventListener('click', function () {
+          sortTrigger.querySelector('.ds-dropdown__trigger-text').textContent = item.textContent;
+          sortTrigger.classList.remove('ds-dropdown__trigger--open');
+          sortPanel.classList.remove('ds-dropdown__panel--open');
+        });
+      });
+
+      document.querySelectorAll('.filter-search').forEach(function (input) {
+        input.addEventListener('input', function () {
+          var options = input.parentNode.querySelectorAll('.filter-option');
+          options.forEach(function (option) { option.style.display = option.textContent.toLowerCase().indexOf(input.value.toLowerCase()) === -1 ? 'none' : ''; });
+        });
+      });
+    }());
+  </script>
+</body>
+</html>
