@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AmpCon-Campus Software Details | FS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../fs-components/component-specs/tokens.css">
+  <link rel="stylesheet" href="../fs-components/component-specs/components.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #FFFFFF; color: var(--color-gray-1); font-family: var(--font-family-base); }
+    .container { width: calc(100% - 48px); max-width: none; margin: 0 24px; }
+    .page-section { padding: 40px 0; }
+    .page-section--white { background: #FFFFFF; }
+    .page-section--gray { background: #FAFBFB; }
+    .detail-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+    .detail-title { color: var(--color-gray-1); font-size: 28px; font-weight: 600; line-height: 36px; }
+    .detail-subtitle { color: var(--color-gray-2); font-size: 16px; line-height: 24px; margin-top: 8px; }
+    .product-description { color: var(--color-gray-3); font-size: 14px; line-height: 22px; max-width: 760px; margin-top: 8px; }
+    .print-button { flex-shrink: 0; margin-top: 4px; }
+    .product-info { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 20px; padding: 20px 0; border-top: 1px solid var(--color-gray-5); border-bottom: 1px solid var(--color-gray-5); margin-bottom: 32px; }
+    .info-field { min-width: 0; }
+    .meta-label { color: var(--color-gray-3); font-size: 12px; line-height: 20px; margin-bottom: 2px; }
+    .meta-value { color: var(--color-gray-1); font-size: 13px; line-height: 20px; }
+    .detail-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr) 220px; gap: 24px; align-items: start; }
+    .selector-panel { position: sticky; top: 24px; background: #FFFFFF; border: 1px solid var(--color-gray-5); border-radius: var(--border-radius-md); padding: 16px 12px 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .selector-title { color: var(--color-gray-1); font-size: 16px; font-weight: 600; line-height: 24px; margin-bottom: 12px; }
+    .selector-field { width: 100%; margin-bottom: 14px; }
+    .selector-label { display: block; color: var(--color-gray-3); font-size: 12px; line-height: 20px; margin-bottom: 4px; }
+    .selector-field .ds-dropdown { width: 100%; }
+    .selector-field .ds-dropdown__panel { width: 100%; }
+    .versions-label { color: var(--color-gray-3); font-size: 12px; line-height: 20px; margin-bottom: 4px; }
+    .version-list { display: flex; flex-direction: column; overflow: hidden; background: #FAFBFB; border: 1px solid var(--color-gray-5); border-radius: var(--border-radius-sm); }
+    .version-option { display: flex; align-items: flex-start; gap: 6px; width: 100%; min-height: 48px; padding: 8px; border: 0; border-bottom: 1px solid var(--color-gray-5); color: var(--color-gray-1); background: #FAFBFB; cursor: pointer; text-align: left; font: inherit; appearance: none; }
+    .version-option:last-child { border-bottom: 0; }
+    .version-option:hover { background: var(--color-hover-overlay-light); }
+    .version-option--active { border-left: 2px solid var(--brand-red); background: #FFFFFF; }
+    .version-marker { color: var(--brand-red); font-size: 10px; line-height: 18px; flex-shrink: 0; }
+    .version-content { display: flex; flex-direction: column; min-width: 0; }
+    .version-name { color: var(--color-gray-1); font-size: 12px; line-height: 18px; white-space: nowrap; }
+    .version-date { color: var(--color-gray-3); font-size: 11px; line-height: 16px; }
+    .current-title { color: var(--color-gray-1); font-size: 20px; font-weight: 600; line-height: 28px; margin-bottom: 20px; }
+    .meta-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--color-gray-5); }
+    .meta-field { min-width: 0; }
+    .meta-value--regular { font-weight: 400; }
+    .meta-value--inline { display: flex; align-items: center; gap: 8px; }
+    .status-tag { display: inline-flex; align-items: center; height: 20px; padding: 0 6px; background: var(--color-gray-7); border-radius: var(--border-radius-md); color: var(--color-gray-2); font-size: 11px; line-height: 20px; }
+    .download-action { margin: 20px 0 28px; }
+    .packages-title { color: var(--color-gray-1); font-size: 18px; font-weight: 600; line-height: 26px; margin-bottom: 12px; }
+    .package-table-wrap { overflow-x: auto; }
+    .package-table, .history-table, .requirements-table { width: 100%; border-collapse: collapse; min-width: 720px; }
+    .package-table th, .package-table td, .history-table th, .history-table td, .requirements-table th, .requirements-table td { padding: 10px 12px; border: 1px solid var(--color-gray-5); text-align: left; font-size: 12px; line-height: 20px; vertical-align: top; }
+    .package-table th, .history-table th, .requirements-table th { background: var(--color-gray-8); color: var(--color-gray-1); font-weight: 600; }
+    .package-table td, .history-table td, .requirements-table td { background: #FFFFFF; color: var(--color-gray-2); }
+    .package-file { color: var(--color-gray-1); font-size: 12px; line-height: 20px; overflow-wrap: anywhere; }
+    .table-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+    .tabs-header { display: flex; align-items: flex-end; gap: 16px; margin-top: 32px; }
+    .tabs-wrap { flex: 1; min-width: 0; overflow-x: auto; }
+    .tabs-header .feedback-link { flex-shrink: 0; margin: 0 0 8px; }
+    .tabs-wrap .ds-tab { min-width: max-content; }
+    .tab-panel { color: var(--color-gray-2); font-size: 13px; line-height: 22px; padding-top: 20px; }
+    .tab-panel[hidden] { display: none; }
+    .tab-heading { color: var(--color-gray-1); font-size: 14px; font-weight: 600; line-height: 22px; margin-bottom: 8px; }
+    .tab-panel p { margin-bottom: 14px; }
+    .tab-panel ul { margin: 0 0 16px 20px; }
+    .tab-panel li { padding-left: 2px; margin-bottom: 4px; }
+    .resource-box { background: #FFFFFF; border: 1px solid var(--color-gray-5); border-radius: var(--border-radius-md); padding: 16px 12px; }
+    .resource-title { color: var(--color-gray-1); font-size: 14px; font-weight: 600; line-height: 22px; margin-bottom: 12px; }
+    .resource-link { display: block; color: var(--color-blue); font-size: 12px; line-height: 20px; text-decoration: none; margin-bottom: 8px; }
+    .resource-link:hover { text-decoration: underline; }
+    .resource-note { color: var(--color-gray-3); font-size: 11px; line-height: 18px; margin-top: 16px; }
+    .feedback-link { display: block; color: var(--color-blue); font-size: 12px; line-height: 20px; text-align: right; text-decoration: none; margin-top: 12px; }
+    .feedback-link:hover { text-decoration: underline; }
+    @media (max-width: 1100px) {
+      .container { width: calc(100% - 32px); margin: 0 16px; }
+      .product-info { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .detail-layout { grid-template-columns: 212px minmax(0, 1fr); }
+      .resource-sidebar { grid-column: 2; position: static; }
+    }
+    @media (max-width: 760px) {
+      .container { width: calc(100% - 24px); margin: 0 12px; }
+      .detail-heading { flex-direction: column; }
+      .product-info { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .detail-layout { display: flex; flex-direction: column; }
+      .selector-panel, .release-main, .resource-sidebar { width: 100%; }
+      .selector-panel { position: static; }
+      .meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .resource-sidebar { order: 3; }
+    }
+    @media (max-width: 480px) {
+      .product-info, .meta-grid { grid-template-columns: 1fr; }
+      .current-title { font-size: 18px; line-height: 26px; }
+      .record-actions { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="ds-nav-header" data-fragment="header">
+    <div class="ds-nav-header__topbar">
+      <div class="ds-nav-header__topbar-inner">
+        <div class="ds-nav-header__topbar-left">
+          <span class="ds-nav-header__topbar-text">FS United States</span>
+          <span class="ds-nav-header__topbar-divider"></span>
+          <span class="ds-nav-header__topbar-text">FREE SHIPPING on Orders Over US$79</span>
+        </div>
+        <div class="ds-nav-header__topbar-right">
+          <a href="#" class="ds-nav-header__topbar-link">Contact Us</a>
+          <span class="ds-nav-header__topbar-divider"></span>
+          <a href="#" class="ds-nav-header__topbar-link">United States / $ USD <svg class="ds-nav-header__dropdown-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="#707070" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </div>
+    </div>
+    <nav class="ds-nav-header__main">
+      <div class="ds-nav-header__main-inner">
+        <a href="#" class="ds-nav-header__logo" aria-label="FS.com Home"><img src="../fs-components/component-specs/icons/icon-logo-fs.svg" alt="FS Logo" width="76" height="36"></a>
+        <ul class="ds-nav-header__links">
+          <li class="ds-nav-header__link-item"><a href="#" class="ds-nav-header__link">All Products</a></li>
+          <li class="ds-nav-header__link-item"><a href="#" class="ds-nav-header__link">Solutions</a></li>
+          <li class="ds-nav-header__link-item"><a href="#" class="ds-nav-header__link">Services</a></li>
+          <li class="ds-nav-header__link-item"><a href="#" class="ds-nav-header__link">Resources</a></li>
+          <li class="ds-nav-header__link-item"><a href="#" class="ds-nav-header__link">Contact Us</a></li>
+        </ul>
+        <div class="ds-nav-header__actions">
+          <button class="ds-nav-header__action-btn" type="button" aria-label="Search"><img src="../fs-components/component-specs/icons/icon-search.svg" alt="" width="24" height="24"></button>
+          <button class="ds-nav-header__action-btn" type="button" aria-label="Account"><img src="../fs-components/component-specs/icons/icon-account.svg" alt="" width="24" height="24"></button>
+          <button class="ds-nav-header__action-btn" type="button" aria-label="Cart"><img src="../fs-components/component-specs/icons/icon-cart.svg" alt="" width="24" height="24"></button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-section page-section--white">
+    <div class="container">
+      <div class="detail-heading">
+        <div>
+          <h1 class="detail-title">AmpCon-Campus</h1>
+          <p class="detail-subtitle">Centralized Network Management and Automation Platform</p>
+          <p class="product-description">AmpCon-Campus is used for centralized configuration, monitoring, and lifecycle management of FS network devices.</p>
+        </div>
+        <a class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s print-button" href="#print"><span class="ds-text-btn__text">Printable Version</span></a>
+      </div>
+
+      <div class="detail-layout">
+        <aside class="selector-panel" aria-label="Find a version">
+          <h2 class="selector-title">Find a version</h2>
+          <div class="selector-field">
+            <label class="selector-label" for="product-trigger">Product</label>
+            <div class="ds-dropdown">
+              <button class="ds-dropdown__trigger ds-dropdown__trigger--sm" id="product-trigger" type="button" aria-expanded="false"><span class="ds-dropdown__trigger-text">AmpCon-Campus</span><img class="ds-dropdown__trigger-arrow" src="../fs-components/component-specs/icons/icon-chevron-down.svg" alt=""></button>
+              <div class="ds-dropdown__panel"><div class="ds-dropdown__list"><div class="ds-dropdown__item ds-dropdown__item--active" role="option">AmpCon-Campus</div></div></div>
+            </div>
+          </div>
+          <div class="selector-field">
+            <label class="selector-label" for="environment-trigger">Operating Environment</label>
+            <div class="ds-dropdown">
+              <button class="ds-dropdown__trigger ds-dropdown__trigger--sm" id="environment-trigger" type="button" aria-expanded="false"><span class="ds-dropdown__trigger-text">All</span><img class="ds-dropdown__trigger-arrow" src="../fs-components/component-specs/icons/icon-chevron-down.svg" alt=""></button>
+              <div class="ds-dropdown__panel"><div class="ds-dropdown__list"><div class="ds-dropdown__item ds-dropdown__item--active" role="option">All</div><div class="ds-dropdown__item" role="option">VMware ESXi</div><div class="ds-dropdown__item" role="option">KVM</div><div class="ds-dropdown__item" role="option">VirtualBox</div><div class="ds-dropdown__item" role="option">Docker</div><div class="ds-dropdown__item" role="option">Linux Server</div></div></div>
+            </div>
+          </div>
+          <div class="selector-field">
+            <label class="selector-label" for="installation-trigger">Installation Type</label>
+            <div class="ds-dropdown">
+              <button class="ds-dropdown__trigger ds-dropdown__trigger--sm" id="installation-trigger" type="button" aria-expanded="false"><span class="ds-dropdown__trigger-text">All</span><img class="ds-dropdown__trigger-arrow" src="../fs-components/component-specs/icons/icon-chevron-down.svg" alt=""></button>
+              <div class="ds-dropdown__panel"><div class="ds-dropdown__list"><div class="ds-dropdown__item ds-dropdown__item--active" role="option">All</div><div class="ds-dropdown__item" role="option">New Installation</div><div class="ds-dropdown__item" role="option">Upgrade Package</div><div class="ds-dropdown__item" role="option">Offline Installation</div></div></div>
+            </div>
+          </div>
+          <p class="versions-label">Version</p>
+          <div class="version-list" aria-label="Versions">
+            <button class="version-option version-option--active" type="button" data-version="1.2.0"><span class="version-marker">▲</span><span class="version-content"><span class="version-name">1.2.0 <span>Latest</span></span><span class="version-date">Aug 15, 2026</span></span></button>
+            <button class="version-option" type="button" data-version="1.1.0"><span class="version-marker">▲</span><span class="version-content"><span class="version-name">1.1.0</span><span class="version-date">Jun 20, 2026</span></span></button>
+            <button class="version-option" type="button" data-version="1.0.0"><span class="version-marker">▲</span><span class="version-content"><span class="version-name">1.0.0</span><span class="version-date">Mar 10, 2026</span></span></button>
+          </div>
+        </aside>
+
+        <section class="release-main" aria-labelledby="release-version-title">
+          <h2 class="current-title" id="release-version-title">AmpCon-Campus Version 1.2.0</h2>
+          <div class="meta-grid">
+            <div class="meta-field"><p class="meta-label">Version</p><p class="meta-value">1.2.0 <span class="status-tag">Latest</span></p></div>
+            <div class="meta-field"><p class="meta-label">Release Date</p><p class="meta-value meta-value--regular">Aug 15, 2026</p></div>
+            <div class="meta-field"><p class="meta-label">Status</p><p class="meta-value meta-value--regular">Latest</p></div>
+            <div class="meta-field"><p class="meta-label">Upgrade Recommendation</p><p class="meta-value meta-value--regular">Recommended</p></div>
+            <div class="meta-field"><p class="meta-label">Reboot Requirement</p><p class="meta-value meta-value--regular">Environment Dependent</p></div>
+            <div class="meta-field"><p class="meta-label">Supported Environments</p><p class="meta-value meta-value--regular">VMware ESXi, KVM, VirtualBox, Docker</p></div>
+            <div class="meta-field"><p class="meta-label">Software Type</p><p class="meta-value meta-value--regular">Application - Network Management</p></div>
+            <div class="meta-field"><p class="meta-label">License</p><p class="meta-value meta-value--regular">License Required</p></div>
+            <div class="meta-field"><p class="meta-label">Support Status</p><p class="meta-value meta-value--regular">Active</p></div>
+          </div>
+
+          <div class="download-action"><a class="ds-btn ds-btn--filled-black ds-btn--m" href="#installation-packages"><span class="ds-btn__text">Sign in to Download</span></a></div>
+
+          <h3 class="packages-title" id="installation-packages">Installation Packages</h3>
+          <div class="package-table-wrap">
+            <table class="package-table">
+              <thead><tr><th>Operating Environment</th><th>Installation Package</th><th>File Format</th><th>File Size</th><th>SHA256</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr data-environment="VMware ESXi"><td>VMware ESXi</td><td class="package-file">AmpCon-Campus-1.2.0-VMware.ova</td><td>OVA / VMDK</td><td>2.4 GB</td><td>xxxxxxxxxxxxx</td><td><div class="table-actions"><a class="ds-btn ds-btn--outline-black ds-btn--s" href="#download-vmware"><span class="ds-btn__text">Download</span></a></div></td></tr>
+                <tr data-environment="KVM"><td>KVM</td><td class="package-file">AmpCon-Campus-1.2.0-KVM.qcow2</td><td>QCOW2</td><td>2.3 GB</td><td>xxxxxxxxxxxxx</td><td><div class="table-actions"><a class="ds-btn ds-btn--outline-black ds-btn--s" href="#download-kvm"><span class="ds-btn__text">Download</span></a></div></td></tr>
+                <tr data-environment="VirtualBox"><td>VirtualBox</td><td class="package-file">AmpCon-Campus-1.2.0-VirtualBox.ova</td><td>OVA</td><td>2.4 GB</td><td>xxxxxxxxxxxxx</td><td><div class="table-actions"><a class="ds-btn ds-btn--outline-black ds-btn--s" href="#download-virtualbox"><span class="ds-btn__text">Download</span></a></div></td></tr>
+                <tr data-environment="Docker"><td>Docker</td><td class="package-file">AmpCon-Campus-1.2.0-Docker.tar</td><td>TAR</td><td>1.8 GB</td><td>xxxxxxxxxxxxx</td><td><div class="table-actions"><a class="ds-btn ds-btn--outline-black ds-btn--s" href="#download-docker"><span class="ds-btn__text">Download</span></a></div></td></tr>
+                <tr data-environment="Linux Server"><td>Linux Server</td><td class="package-file">AmpCon-Campus-1.2.0-Linux.tar.gz</td><td>TAR.GZ</td><td>1.9 GB</td><td>xxxxxxxxxxxxx</td><td><div class="table-actions"><a class="ds-btn ds-btn--outline-black ds-btn--s" href="#download-linux"><span class="ds-btn__text">Download</span></a></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="resource-note">License Required. Download access may require login or authorization.</p>
+
+          <div class="tabs-header">
+          <div class="tabs-wrap">
+            <div class="ds-tab ds-tab--standard" data-tab-group>
+              <div class="ds-tab__item ds-tab__item--active" data-tab-item="release-notes"><div class="ds-tab__item-inner"><span class="ds-tab__item-text">Release Notes</span><div class="ds-tab__indicator"></div></div></div>
+              <div class="ds-tab__item" data-tab-item="revision-history"><div class="ds-tab__item-inner"><span class="ds-tab__item-text">Revision History</span></div></div>
+              <div class="ds-tab__item" data-tab-item="important"><div class="ds-tab__item-inner"><span class="ds-tab__item-text">Important</span></div></div>
+              <div class="ds-tab__item" data-tab-item="installation"><div class="ds-tab__item-inner"><span class="ds-tab__item-text">Installation Instructions</span></div></div>
+              <div class="ds-tab__item" data-tab-item="requirements"><div class="ds-tab__item-inner"><span class="ds-tab__item-text">System Requirements</span></div></div>
+              <div class="ds-tab__item" data-tab-item="enhancements"><div class="ds-tab__item-inner"><span class="ds-tab__item-text">Enhancements</span></div></div>
+              <div class="ds-tab__item" data-tab-item="eula"><div class="ds-tab__item-inner"><span class="ds-tab__item-text">License / EULA</span></div></div>
+            </div>
+          </div>
+          <a class="feedback-link" href="#feedback">Feedback</a>
+          </div>
+
+          <div class="tab-panel" data-tab-panel="release-notes">
+            <p class="tab-heading">Release Notes</p>
+            <ul><li>New features</li><li>Feature optimizations</li><li>Bug fixes</li><li>Known issues</li><li>Supported device models</li><li>Supported PicOS® versions</li><li>Incompatible or no longer supported environments</li></ul>
+          </div>
+          <div class="tab-panel" data-tab-panel="revision-history" hidden>
+            <p class="tab-heading">Revision History</p>
+            <table class="history-table"><thead><tr><th>Version</th><th>Date</th><th>Change</th></tr></thead><tbody><tr><td>1.2.0</td><td>2026-08-15</td><td>Added Docker deployment support</td></tr><tr><td>1.1.0</td><td>2026-06-20</td><td>Optimized bulk device configuration</td></tr><tr><td>1.0.0</td><td>2026-03-10</td><td>Initial release</td></tr></tbody></table>
+          </div>
+          <div class="tab-panel" data-tab-panel="important" hidden>
+            <p class="tab-heading">Important</p>
+            <ul><li>Back up configuration before upgrade.</li><li>Check whether cross-version upgrade is supported.</li><li>Confirm whether downtime is required.</li><li>Confirm whether AmpCon-Campus needs to be restarted.</li><li>Review database or configuration file migration requirements.</li><li>Confirm whether the license file needs to be reactivated.</li></ul>
+          </div>
+          <div class="tab-panel" data-tab-panel="installation" hidden>
+            <p class="tab-heading">Installation Instructions</p>
+            <ul><li><a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#vmware-guide"><span class="ds-text-btn__text">VMware ESXi Installation Guide</span></a></li><li><a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#kvm-guide"><span class="ds-text-btn__text">KVM Installation Guide</span></a></li><li><a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#virtualbox-guide"><span class="ds-text-btn__text">VirtualBox Installation Guide</span></a></li><li><a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#docker-guide"><span class="ds-text-btn__text">Docker Installation Guide</span></a></li><li><a class="ds-text-btn ds-text-btn--inline ds-text-btn--blue ds-text-btn--s" href="#linux-guide"><span class="ds-text-btn__text">Linux Installation Guide</span></a></li></ul>
+          </div>
+          <div class="tab-panel" data-tab-panel="requirements" hidden>
+            <p class="tab-heading">System Requirements</p>
+            <table class="requirements-table"><thead><tr><th>Item</th><th>Minimum Requirement</th><th>Recommended Configuration</th></tr></thead><tbody><tr><td>CPU</td><td>4 vCPU</td><td>8 vCPU</td></tr><tr><td>Memory</td><td>8 GB</td><td>16 GB</td></tr><tr><td>Storage</td><td>100 GB</td><td>200 GB</td></tr><tr><td>Network</td><td>1 Gbps</td><td>10 Gbps</td></tr><tr><td>Browser</td><td>Chrome / Edge</td><td>Latest Version</td></tr></tbody></table>
+          </div>
+          <div class="tab-panel" data-tab-panel="enhancements" hidden>
+            <p class="tab-heading">Enhancements</p>
+            <ul><li>Device auto-discovery</li><li>Bulk configuration deployment</li><li>Network topology display</li><li>User permission management</li><li>Device alarm monitoring</li><li>Configuration backup and recovery</li></ul>
+          </div>
+          <div class="tab-panel" data-tab-panel="eula" hidden>
+            <p class="tab-heading">License / EULA</p>
+            <ul><li>Software license agreement</li><li>Open-source software statement</li><li>Version authorization information</li><li>Commercial license and trial license information</li></ul>
+          </div>
+        </section>
+
+        <aside class="resource-sidebar" aria-label="Additional Resources">
+          <div class="resource-box">
+            <p class="resource-title">Additional Resources</p>
+            <a class="resource-link" href="#user-guide">AmpCon-Campus User Guide</a>
+            <a class="resource-link" href="#installation-guide">AmpCon-Campus Installation Guide</a>
+            <a class="resource-link" href="#release-notes">AmpCon-Campus Release Notes</a>
+            <a class="resource-link" href="#upgrade-guide">AmpCon-Campus Upgrade Guide</a>
+            <a class="resource-link" href="#license-guide">AmpCon-Campus License Guide</a>
+            <a class="resource-link" href="#supported-devices">Supported Devices List</a>
+            <a class="resource-link" href="#technical-support">Technical Support</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <footer class="ds-nav-footer" data-fragment="footer">
+    <div class="ds-nav-footer__inner">
+      <div class="ds-nav-footer__columns">
+        <div class="ds-nav-footer__col"><h4 class="ds-nav-footer__col-title">About Us</h4><ul class="ds-nav-footer__col-links"><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Overview</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Global Warehouse</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Advanced R&amp;D Center</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Quality Control</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Compliance Center</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Test Center</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Contact Us</span></a></li></ul></div>
+        <div class="ds-nav-footer__col"><h4 class="ds-nav-footer__col-title">Service</h4><ul class="ds-nav-footer__col-links"><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Payment Methods</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Shipping Guide</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Business Account</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Net Terms</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Return Policy</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Product Warranty</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Give us your Feedback</span></a></li></ul></div>
+        <div class="ds-nav-footer__col"><h4 class="ds-nav-footer__col-title">Resource</h4><ul class="ds-nav-footer__col-links"><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Documentation</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Glossary</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Audio &amp; Video</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">FS Blog</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Case Studies</span></a></li></ul></div>
+        <div class="ds-nav-footer__col"><h4 class="ds-nav-footer__col-title">Support</h4><ul class="ds-nav-footer__col-links"><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">FAQ &amp; Help Center</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Solution Support</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Query Tool</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">WDM Transceiver Stock List</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Products Verification</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">Track My Order</span></a></li><li><a href="#" class="ds-text-btn ds-text-btn--inline ds-text-btn--black ds-text-btn--s"><span class="ds-text-btn__text">RMA Checklist</span></a></li></ul></div>
+        <div class="ds-nav-footer__sidebar"><div class="ds-nav-footer__subscribe"><h4 class="ds-nav-footer__col-title">Stay in Touch</h4><div class="ds-nav-footer__subscribe-form"><input type="email" class="ds-nav-footer__subscribe-input" placeholder="Email" aria-label="Email"><button class="ds-nav-footer__subscribe-btn" type="button">Subscribe</button></div></div><div class="ds-nav-footer__app"><h4 class="ds-nav-footer__col-title">Download FS APP</h4><div class="ds-nav-footer__app-badges"><a href="#" aria-label="Download on the App Store"><img src="../fs-components/component-specs/icons/img-app-store.svg" alt="App Store" height="28"></a><a href="#" aria-label="Get it on Google Play"><img src="../fs-components/component-specs/icons/img-google-play.svg" alt="Google Play" height="28"></a></div></div><div class="ds-nav-footer__social"><a href="#" class="ds-nav-footer__social-link" aria-label="LinkedIn"><img src="../fs-components/component-specs/icons/icon-social-linkedin.svg" alt="" width="16" height="16"></a><a href="#" class="ds-nav-footer__social-link" aria-label="YouTube"><img src="../fs-components/component-specs/icons/icon-social-youtube.svg" alt="" width="16" height="16"></a><a href="#" class="ds-nav-footer__social-link" aria-label="Facebook"><img src="../fs-components/component-specs/icons/icon-social-facebook.svg" alt="" width="16" height="16"></a><a href="#" class="ds-nav-footer__social-link" aria-label="X"><img src="../fs-components/component-specs/icons/icon-social-x.svg" alt="" width="16" height="16"></a><a href="#" class="ds-nav-footer__social-link" aria-label="Instagram"><img src="../fs-components/component-specs/icons/icon-social-instagram.svg" alt="" width="16" height="16"></a><a href="#" class="ds-nav-footer__social-link" aria-label="Reddit"><img src="../fs-components/component-specs/icons/icon-social-reddit.svg" alt="" width="16" height="16"></a></div></div>
+      </div>
+      <div class="ds-nav-footer__badges"><div class="ds-nav-footer__badges-left"><img src="../fs-components/component-specs/icons/img-badge-trustpilot.svg" alt="Trustpilot" height="28"><img src="../fs-components/component-specs/icons/img-badge-trustedsite.svg" alt="TrustedSite" height="28"><img src="../fs-components/component-specs/icons/img-badge-bbb.svg" alt="BBB" height="28"><img src="../fs-components/component-specs/icons/img-badge-google.svg" alt="Google Reviews" height="28"></div><div class="ds-nav-footer__badges-right"><a href="#" class="ds-nav-footer__region-link">United States / $ USD<svg class="ds-nav-footer__dropdown-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="#707070" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div>
+      <hr class="ds-nav-footer__divider">
+      <div class="ds-nav-footer__legal"><div class="ds-nav-footer__legal-links"><a href="#" class="ds-nav-footer__legal-link">Site Map</a><span class="ds-nav-footer__legal-divider"></span><a href="#" class="ds-nav-footer__legal-link">Accessibility</a><span class="ds-nav-footer__legal-divider"></span><a href="#" class="ds-nav-footer__legal-link">Privacy Policy and Notice at Collection</a><span class="ds-nav-footer__legal-divider"></span><a href="#" class="ds-nav-footer__legal-link">Cookies Notice</a><span class="ds-nav-footer__legal-divider"></span><a href="#" class="ds-nav-footer__legal-link">Terms and Conditions</a><span class="ds-nav-footer__legal-divider"></span><a href="#" class="ds-nav-footer__legal-link">Report a Vulnerability</a><span class="ds-nav-footer__legal-divider"></span><a href="#" class="ds-nav-footer__legal-link">Do Not Sell or Share My Personal Information</a><span class="ds-nav-footer__legal-divider"></span><a href="#" class="ds-nav-footer__legal-link">Company Policies</a><span class="ds-nav-footer__legal-divider"></span><a href="#" class="ds-nav-footer__legal-link">Cookie Settings</a></div><div class="ds-nav-footer__copyright">Copyright &copy; 2009-2026 FS.COM INC. All Rights Reserved.</div></div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      function closeDropdowns(except) {
+        document.querySelectorAll('.selector-field .ds-dropdown').forEach(function (dropdown) {
+          if (dropdown !== except) {
+            var trigger = dropdown.querySelector('.ds-dropdown__trigger');
+            var panel = dropdown.querySelector('.ds-dropdown__panel');
+            trigger.classList.remove('ds-dropdown__trigger--open');
+            trigger.setAttribute('aria-expanded', 'false');
+            panel.classList.remove('ds-dropdown__panel--open');
+          }
+        });
+      }
+      document.querySelectorAll('.selector-field .ds-dropdown').forEach(function (dropdown) {
+        var trigger = dropdown.querySelector('.ds-dropdown__trigger');
+        var panel = dropdown.querySelector('.ds-dropdown__panel');
+        trigger.addEventListener('click', function (event) {
+          event.stopPropagation();
+          var isOpen = panel.classList.contains('ds-dropdown__panel--open');
+          closeDropdowns(dropdown);
+          trigger.classList.toggle('ds-dropdown__trigger--open', !isOpen);
+          trigger.setAttribute('aria-expanded', String(!isOpen));
+          panel.classList.toggle('ds-dropdown__panel--open', !isOpen);
+        });
+        panel.querySelectorAll('.ds-dropdown__item').forEach(function (item) {
+          item.addEventListener('click', function () {
+            panel.querySelectorAll('.ds-dropdown__item').forEach(function (option) { option.classList.remove('ds-dropdown__item--active'); });
+            item.classList.add('ds-dropdown__item--active');
+            trigger.querySelector('.ds-dropdown__trigger-text').textContent = item.textContent;
+            if (trigger.id === 'environment-trigger') {
+              document.querySelectorAll('.package-table tbody tr').forEach(function (row) { row.hidden = item.textContent !== 'All' && row.dataset.environment !== item.textContent; });
+            }
+            closeDropdowns();
+          });
+        });
+      });
+      document.addEventListener('click', function () { closeDropdowns(); });
+
+      document.querySelectorAll('.version-option').forEach(function (option) {
+        option.addEventListener('click', function () {
+          document.querySelectorAll('.version-option').forEach(function (item) { item.classList.remove('version-option--active'); });
+          option.classList.add('version-option--active');
+          document.getElementById('release-version-title').textContent = 'AmpCon-Campus Version ' + option.dataset.version;
+        });
+      });
+
+      document.querySelectorAll('[data-tab-group]').forEach(function (group) {
+        group.querySelectorAll('[data-tab-item]').forEach(function (tab) {
+          tab.addEventListener('click', function () {
+            group.querySelectorAll('[data-tab-item]').forEach(function (item) {
+              item.classList.remove('ds-tab__item--active');
+              var indicator = item.querySelector('.ds-tab__indicator');
+              if (indicator) indicator.remove();
+            });
+            tab.classList.add('ds-tab__item--active');
+            var inner = tab.querySelector('.ds-tab__item-inner');
+            if (!inner) { inner = document.createElement('div'); inner.className = 'ds-tab__item-inner'; var text = tab.querySelector('.ds-tab__item-text'); tab.removeChild(text); inner.appendChild(text); tab.appendChild(inner); }
+            var indicator = document.createElement('div'); indicator.className = 'ds-tab__indicator'; inner.appendChild(indicator);
+            document.querySelectorAll('[data-tab-panel]').forEach(function (panel) { panel.hidden = panel.dataset.tabPanel !== tab.dataset.tabItem; });
+          });
+        });
+      });
+    }());
+  </script>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
